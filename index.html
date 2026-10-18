@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Web Player — Débloqué</title>
+  <title>YouTube</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff0000'><path d='M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z'/></svg>">
   <style>
     :root {
       --bg: #0f0f0f;
       --surface: #1e1e1e;
-      --surface-2: #282828;
+      --surface-hover: #272727;
+      --surface-active: #3f3f3f;
       --text: #f1f1f1;
       --text-muted: #aaaaaa;
-      --accent: #ff0000;
-      --accent-hover: #cc0000;
-      --border: #383838;
-      --radius: 12px;
+      --yt-red: #ff0000;
+      --border: #2e2e2e;
+      --chip-bg: #272727;
+      --chip-hover: #383838;
+      --chip-active-bg: #f1f1f1;
+      --chip-active-text: #0f0f0f;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,120 +26,207 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: "Roboto", "Segoe UI", Arial, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
+    /* Top Navigation Bar */
     header {
-      background: rgba(15, 15, 15, 0.95);
-      backdrop-filter: blur(10px);
+      background: var(--bg);
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
+      height: 56px;
+      padding: 0 16px;
       display: flex;
       align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.15rem;
+      gap: 4px;
+      cursor: pointer;
       text-decoration: none;
       color: var(--text);
+      letter-spacing: -0.5px;
+      font-size: 1.15rem;
+      font-weight: 700;
     }
 
-    .brand svg { width: 28px; height: 28px; fill: var(--accent); }
+    .brand svg {
+      width: 30px;
+      height: 22px;
+      fill: var(--yt-red);
+    }
 
-    .search-box {
+    .header-center {
       flex: 1;
-      max-width: 650px;
+      max-width: 640px;
+      margin: 0 16px;
       display: flex;
-      position: relative;
+      align-items: center;
     }
 
-    .search-box input {
+    .search-form {
+      display: flex;
       width: 100%;
-      background: var(--surface);
+      height: 40px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 100%;
+      background: #121212;
       border: 1px solid var(--border);
-      border-radius: 24px 0 0 24px;
-      padding: 10px 18px;
+      border-radius: 40px 0 0 40px;
+      padding: 0 16px;
       color: var(--text);
-      font-size: 0.95rem;
+      font-size: 1rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.15s ease;
     }
 
-    .search-box input:focus {
-      border-color: #3ea6ff;
+    .search-input:focus {
+      border-color: #1c62b9;
     }
 
-    .search-box button {
-      background: var(--surface-2);
+    .search-btn {
+      width: 64px;
+      height: 40px;
+      background: #222222;
       border: 1px solid var(--border);
       border-left: none;
-      border-radius: 0 24px 24px 0;
-      padding: 0 22px;
+      border-radius: 0 40px 40px 0;
       cursor: pointer;
       color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: background 0.15s ease;
     }
 
-    .search-box button:hover { background: #333333; }
+    .search-btn:hover {
+      background: #2a2a2a;
+    }
 
-    .engine-select {
-      background: var(--surface);
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .engine-badge {
+      background: #1f1f1f;
       border: 1px solid var(--border);
-      color: var(--text);
-      padding: 9px 14px;
+      color: var(--text-muted);
       border-radius: 20px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .engine-badge select {
+      background: transparent;
+      border: none;
+      color: #3ea6ff;
+      font-weight: 600;
+      font-size: 0.8rem;
       cursor: pointer;
       outline: none;
     }
 
+    /* Category Chips / Pills */
+    .chips-bar {
+      position: sticky;
+      top: 56px;
+      z-index: 90;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .chips-bar::-webkit-scrollbar { display: none; }
+
+    .chip {
+      background: var(--chip-bg);
+      color: var(--text);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .chip:hover {
+      background: var(--chip-hover);
+    }
+
+    .chip.active {
+      background: var(--chip-active-bg);
+      color: var(--chip-active-text);
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
     main {
       flex: 1;
-      max-width: 1300px;
+      max-width: 1800px;
       width: 100%;
       margin: 0 auto;
-      padding: 24px 16px;
+      padding: 20px 24px 60px;
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
 
-    /* Player Container */
+    /* Theater Player Section */
     #player-section {
       display: none;
       flex-direction: column;
-      gap: 14px;
-      background: var(--surface);
-      padding: 16px;
-      border-radius: var(--radius);
+      gap: 12px;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
       border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     }
 
-    .video-wrapper {
+    .video-viewport {
       position: relative;
       width: 100%;
-      padding-top: 56.25%; /* 16:9 ratio */
-      border-radius: 8px;
-      overflow: hidden;
+      padding-top: 56.25%; /* 16:9 */
       background: #000;
     }
 
-    .video-wrapper iframe {
+    .video-viewport iframe {
       position: absolute;
       top: 0;
       left: 0;
@@ -145,375 +235,623 @@
       border: none;
     }
 
-    .player-controls {
+    .player-details {
+      background: var(--surface);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .player-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .player-video-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .close-player-btn {
+      background: var(--surface-hover);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+
+    .close-player-btn:hover { background: var(--surface-active); }
+
+    .player-meta-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.08);
     }
 
-    .video-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-    }
-
-    .engine-switcher {
+    .player-channel {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+    }
+
+    .player-channel-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #333;
+      object-fit: cover;
+    }
+
+    .player-channel-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .player-engine-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-size: 0.85rem;
       color: var(--text-muted);
     }
 
-    .engine-switcher select {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
+    .player-engine-controls select {
+      background: var(--surface-hover);
       color: var(--text);
-      padding: 6px 12px;
+      border: 1px solid var(--border);
       border-radius: 6px;
+      padding: 6px 10px;
       outline: none;
+      cursor: pointer;
     }
 
-    /* Info notice for work bypass */
-    .notice {
-      background: #182230;
-      border: 1px solid #1f3a5f;
-      color: #93c5fd;
-      padding: 14px 18px;
-      border-radius: var(--radius);
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-
-    .notice strong { color: #bfdbfe; }
-
-    /* Results Grid */
-    .section-title {
-      font-size: 1.2rem;
-      font-weight: 600;
+    /* Section Title */
+    .feed-header {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 4px;
     }
 
+    .feed-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Video Cards Grid */
     .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 20px 16px;
+    }
+
+    @media (min-width: 1400px) {
+      .video-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     .video-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      border: 1px solid transparent;
       display: flex;
       flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: transform 0.15s ease;
     }
 
-    .video-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-      border-color: var(--border);
+    .video-card:hover .thumb-img {
+      border-radius: 0;
     }
 
-    .card-thumb {
+    .thumb-wrapper {
       position: relative;
       width: 100%;
       aspect-ratio: 16/9;
-      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #181818;
     }
 
-    .card-thumb img {
+    .thumb-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: border-radius 0.2s ease;
+      background: #181818;
     }
 
-    .card-duration {
+    .video-duration {
       position: absolute;
       bottom: 8px;
       right: 8px;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0, 0, 0, 0.82);
       color: #fff;
       font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 4px;
       font-weight: 600;
+      padding: 3px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
     }
 
-    .card-info {
-      padding: 12px;
+    .video-meta {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .channel-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #252525;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .video-info {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      flex: 1;
+      gap: 4px;
+      overflow: hidden;
     }
 
-    .card-title {
+    .video-title {
       font-size: 0.95rem;
       font-weight: 600;
       line-height: 1.35;
+      color: var(--text);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
 
-    .card-author {
+    .channel-title {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .channel-title:hover {
+      color: var(--text);
+    }
+
+    .video-substats {
       font-size: 0.8rem;
       color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
+    /* Loading / Spinner */
+    .loading-container {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      gap: 16px;
       color: var(--text-muted);
     }
 
-    /* Preset Quick Picks */
-    .quick-tags {
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--yt-red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-container {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
       display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 4px;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
 
-    .quick-tag {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 14px;
-      border-radius: 16px;
-      font-size: 0.85rem;
+    .error-btn {
+      background: #3ea6ff;
+      color: #0f0f0f;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 18px;
+      font-weight: 600;
       cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s;
     }
 
-    .quick-tag:hover { background: var(--surface-2); }
+    @media (max-width: 600px) {
+      header { padding: 0 10px; }
+      .header-right { display: none; }
+      main { padding: 12px; }
+      .chips-bar { padding: 10px 12px; }
+    }
   </style>
 </head>
 <body>
 
+  <!-- Top Bar -->
   <header>
-    <a href="#" class="brand" onclick="location.reload()">
-      <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      <span>YT Web</span>
-    </a>
-
-    <form class="search-box" id="search-form" onsubmit="handleSearch(event)">
-      <input type="text" id="search-input" placeholder="Rechercher une vidéo ou coller un lien YouTube..." autocomplete="off">
-      <button type="submit" title="Rechercher">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      </button>
-    </form>
-
-    <select class="engine-select" id="engine-selector" onchange="onEngineChange()">
-      <option value="nocookie">Mode 1: YouTube NoCookie (Bypass standard)</option>
-      <option value="yewtu">Mode 2: Invidious (yewtu.be)</option>
-      <option value="nadeko">Mode 3: Invidious (nadeko.net)</option>
-      <option value="piped">Mode 4: Piped (piped.video)</option>
-    </select>
-  </header>
-
-  <main>
-    <div class="notice">
-      💡 <strong>Astuce Contournement Travail</strong> : Si le domaine <code>youtube.com</code> est bloqué sur votre réseau, le <strong>Mode 1 (YouTube NoCookie)</strong> fonctionne souvent car les entreprises l'autorisent pour les formations. Si celui-ci est également bloqué, basculez sur <strong>Invidious (Mode 2 ou 3)</strong> ou <strong>Piped (Mode 4)</strong> qui passent par des serveurs tiers indépendants sans traqueur ni pub.
+    <div class="header-left">
+      <a class="brand" onclick="loadTrending()">
+        <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        <span>YouTube</span>
+      </a>
     </div>
 
-    <!-- Active Player Section -->
+    <div class="header-center">
+      <form class="search-form" id="search-form" onsubmit="onSearchSubmit(event)">
+        <div class="search-input-wrapper">
+          <input type="text" class="search-input" id="search-input" placeholder="Rechercher ou coller un lien YouTube..." autocomplete="off">
+        </div>
+        <button type="submit" class="search-btn" title="Rechercher">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <div class="header-right">
+      <div class="engine-badge">
+        <span>Lecteur :</span>
+        <select id="global-engine" onchange="onGlobalEngineChange(this.value)">
+          <option value="nocookie">YouTube NoCookie</option>
+          <option value="piped">Piped Proxy</option>
+          <option value="yewtu">Invidious</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Chips -->
+  <nav class="chips-bar" id="chips-bar">
+    <button class="chip active" onclick="selectChip(this, () => loadTrending())">🔥 Tendances</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Musique 2026'))">🎵 Musique</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Jeux vidéo gaming fr'))">🎮 Jeux vidéo</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Documentaire science'))">🔬 Science</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Lofi hip hop live'))">🎧 Lofi</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Actualités France'))">📰 Actualités</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Tech informatique programmation'))">💻 Informatique</button>
+  </nav>
+
+  <!-- Main View -->
+  <main>
+    <!-- Player Section -->
     <section id="player-section">
-      <div class="video-wrapper">
+      <div class="video-viewport">
         <iframe id="video-frame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
-      <div class="player-controls">
-        <div class="video-title" id="current-video-title">Lecture en cours</div>
-        <div class="engine-switcher">
-          <span>Lecteur utilisé :</span>
-          <select id="player-engine-select" onchange="switchCurrentPlayer(this.value)">
-            <option value="nocookie">YouTube NoCookie</option>
-            <option value="yewtu">Invidious (yewtu.be)</option>
-            <option value="nadeko">Invidious (nadeko.net)</option>
-            <option value="piped">Piped (piped.video)</option>
-          </select>
+      <div class="player-details">
+        <div class="player-title-row">
+          <h2 class="player-video-title" id="player-title">Titre de la vidéo</h2>
+          <button class="close-player-btn" onclick="closePlayer()" title="Fermer le lecteur">✕</button>
+        </div>
+        <div class="player-meta-row">
+          <div class="player-channel">
+            <img class="player-channel-avatar" id="player-avatar" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'><circle cx='12' cy='12' r='10'/></svg>" alt="">
+            <div>
+              <div class="player-channel-name" id="player-channel">Chaîne</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);" id="player-stats">Lecture en cours</div>
+            </div>
+          </div>
+          <div class="player-engine-controls">
+            <span>Moteur :</span>
+            <select id="player-engine-select" onchange="switchEngine(this.value)">
+              <option value="nocookie">YouTube NoCookie</option>
+              <option value="piped">Piped (piped.video)</option>
+              <option value="yewtu">Invidious (yewtu.be)</option>
+            </select>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Quick Suggestions -->
-    <div class="quick-tags">
-      <button class="quick-tag" onclick="quickSearch('Lofi hip hop radio')">🎧 Lofi Radio</button>
-      <button class="quick-tag" onclick="quickSearch('Documentaire science')">🔬 Science</button>
-      <button class="quick-tag" onclick="quickSearch('Gaming fr')">🎮 Gaming</button>
-      <button class="quick-tag" onclick="quickSearch('Musique electro 2026')">🎵 Musique</button>
-      <button class="quick-tag" onclick="quickSearch('Actualités')">📰 Actualités</button>
+    <!-- Video Feed -->
+    <div class="feed-header">
+      <h1 class="feed-title" id="feed-title">🔥 Tendances</h1>
     </div>
 
-    <!-- Videos Grid / Search Results -->
-    <section>
-      <div class="section-title" id="results-title">Vidéos Populaires</div>
-      <div class="video-grid" id="video-grid">
-        <div class="empty-state">Chargement des vidéos...</div>
+    <div class="video-grid" id="video-grid">
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement des tendances...</p>
       </div>
-    </section>
+    </div>
   </main>
 
   <script>
+    // Public Piped API instances with verified CORS support
+    const PIPED_APIS = [
+      'https://api.piped.private.coffee',
+      'https://pipedapi.ducks.party',
+      'https://pipedapi.adminforge.de'
+    ];
+
     let currentVideoId = '';
     let currentEngine = 'nocookie';
 
     const ENGINES = {
       nocookie: id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`,
-      yewtu: id => `https://yewtu.be/embed/${id}?autoplay=1`,
-      nadeko: id => `https://inv.nadeko.net/embed/${id}?autoplay=1`,
-      piped: id => `https://piped.video/embed/${id}?autoplay=1`
+      piped: id => `https://piped.video/embed/${id}?autoplay=1`,
+      yewtu: id => `https://yewtu.be/embed/${id}?autoplay=1`
     };
 
-    function extractVideoId(urlOrId) {
-      if (!urlOrId) return null;
-      urlOrId = urlOrId.trim();
-      if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
+    // Helper: Query Piped API with automatic failover
+    async function apiRequest(endpoint) {
+      let lastError = null;
+      for (const base of PIPED_APIS) {
+        try {
+          const res = await fetch(base + endpoint, { signal: AbortSignal.timeout(6000) });
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      throw lastError || new Error("API non joignable");
+    }
+
+    // Video ID extractor (supports standard, shorts, youtu.be, embed, or raw 11 chars)
+    function extractVideoId(input) {
+      if (!input) return null;
+      input = input.trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
       const patterns = [
         /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/|yewtu\.be\/watch\?v=)([a-zA-Z0-9_-]{11})/,
         /v=([a-zA-Z0-9_-]{11})/
       ];
       for (const p of patterns) {
-        const m = urlOrId.match(p);
+        const m = input.match(p);
         if (m) return m[1];
       }
       return null;
     }
 
-    function playVideo(id, title = '') {
-      currentVideoId = id;
-      const engine = document.getElementById('engine-selector').value;
+    // Play video in theater mode
+    function playVideo(video) {
+      currentVideoId = video.id;
+      const engine = document.getElementById('global-engine').value;
       currentEngine = engine;
       document.getElementById('player-engine-select').value = engine;
 
       const frame = document.getElementById('video-frame');
-      frame.src = ENGINES[engine](id);
+      frame.src = ENGINES[engine](video.id);
 
-      const section = document.getElementById('player-section');
-      section.style.display = 'flex';
-      document.getElementById('current-video-title').textContent = title || `Vidéo (ID: ${id})`;
+      document.getElementById('player-title').textContent = video.title || 'Vidéo';
+      document.getElementById('player-channel').textContent = video.uploader || 'Chaîne YouTube';
+      document.getElementById('player-stats').textContent = [video.viewsText, video.uploadedText].filter(Boolean).join(' • ');
+      
+      const avatarEl = document.getElementById('player-avatar');
+      if (video.avatar) {
+        avatarEl.src = video.avatar;
+      }
 
-      section.scrollIntoView({ behavior: 'smooth' });
+      const playerSec = document.getElementById('player-section');
+      playerSec.style.display = 'flex';
+      playerSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function switchCurrentPlayer(engine) {
+    function switchEngine(engine) {
       currentEngine = engine;
-      document.getElementById('engine-selector').value = engine;
+      document.getElementById('global-engine').value = engine;
+      document.getElementById('player-engine-select').value = engine;
       if (currentVideoId) {
         document.getElementById('video-frame').src = ENGINES[engine](currentVideoId);
       }
     }
 
-    function onEngineChange() {
-      const engine = document.getElementById('engine-selector').value;
-      switchCurrentPlayer(engine);
+    function onGlobalEngineChange(val) {
+      switchEngine(val);
     }
 
-    async function handleSearch(e) {
-      if (e) e.preventDefault();
-      const input = document.getElementById('search-input').value.trim();
-      if (!input) return;
-
-      const directId = extractVideoId(input);
-      if (directId) {
-        playVideo(directId, "Lien YouTube direct");
-        return;
-      }
-
-      await fetchSearchResults(input);
+    function closePlayer() {
+      const playerSec = document.getElementById('player-section');
+      playerSec.style.display = 'none';
+      document.getElementById('video-frame').src = '';
+      currentVideoId = '';
     }
 
-    function quickSearch(query) {
-      document.getElementById('search-input').value = query;
-      fetchSearchResults(query);
-    }
-
-    async function fetchSearchResults(query) {
+    // Load Trending Videos
+    async function loadTrending() {
       const grid = document.getElementById('video-grid');
-      document.getElementById('results-title').textContent = `Résultats pour "${query}"`;
-      grid.innerHTML = '<div class="empty-state">Recherche en cours...</div>';
+      const title = document.getElementById('feed-title');
+      title.textContent = '🔥 Tendances (France)';
+      grid.innerHTML = `
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement des tendances YouTube...</p>
+        </div>`;
 
-      const instances = [
-        'https://inv.nadeko.net/api/v1/search?q=',
-        'https://invidious.nerdvpn.de/api/v1/search?q=',
-        'https://yewtu.be/api/v1/search?q='
-      ];
+      try {
+        const data = await apiRequest('/trending?region=FR');
+        if (!Array.isArray(data) || data.length === 0) throw new Error("Aucun résultat");
+        
+        const items = data.map(item => ({
+          id: (item.url || '').replace('/watch?v=', ''),
+          title: item.title,
+          thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
+          duration: item.duration,
+          uploader: item.uploaderName,
+          avatar: item.uploaderAvatar,
+          views: item.views,
+          uploadedText: item.uploadedDate || ''
+        })).filter(x => x.id && x.title);
 
-      let results = null;
-      for (const inst of instances) {
-        try {
-          const res = await fetch(inst + encodeURIComponent(query), { signal: AbortSignal.timeout(5000) });
-          if (res.ok) {
-            results = await res.json();
-            break;
-          }
-        } catch (_) {}
-      }
-
-      if (!results || !Array.isArray(results) || results.length === 0) {
+        renderGrid(items);
+      } catch (err) {
+        console.error(err);
         grid.innerHTML = `
-          <div class="empty-state">
-            <p>Impossible de joindre le moteur de recherche automatique.</p>
-            <p style="margin-top: 8px; font-size: 0.9rem;">Vous pouvez toujours <strong>coller directement un lien YouTube</strong> dans la barre ci-dessus pour lancer la vidéo !</p>
+          <div class="error-container">
+            <p>Impossible de charger les tendances en direct.</p>
+            <button class="error-btn" onclick="loadTrending()">Réessayer</button>
           </div>`;
+      }
+    }
+
+    // Search Videos
+    async function searchVideos(query) {
+      const grid = document.getElementById('video-grid');
+      const title = document.getElementById('feed-title');
+      title.textContent = `Résultats pour "${query}"`;
+      grid.innerHTML = `
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Recherche de "${escapeHtml(query)}" en cours...</p>
+        </div>`;
+
+      try {
+        const data = await apiRequest(`/search?q=${encodeURIComponent(query)}&filter=all`);
+        const streams = (data.items || []).filter(x => x.type === 'stream' || (x.url && x.url.includes('/watch?v=')));
+
+        if (streams.length === 0) {
+          grid.innerHTML = `
+            <div class="error-container">
+              <p>Aucune vidéo trouvée pour "${escapeHtml(query)}".</p>
+            </div>`;
+          return;
+        }
+
+        const items = streams.map(item => ({
+          id: (item.url || '').replace('/watch?v=', ''),
+          title: item.title,
+          thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
+          duration: item.duration,
+          uploader: item.uploaderName,
+          avatar: item.uploaderAvatar,
+          views: item.views,
+          uploadedText: item.uploadedDate || ''
+        })).filter(x => x.id && x.title);
+
+        renderGrid(items);
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `
+          <div class="error-container">
+            <p>Erreur lors de la recherche.</p>
+            <button class="error-btn" onclick="searchVideos('${escapeHtml(query)}')">Réessayer</button>
+          </div>`;
+      }
+    }
+
+    function onSearchSubmit(e) {
+      if (e) e.preventDefault();
+      const val = document.getElementById('search-input').value.trim();
+      if (!val) return;
+
+      const directId = extractVideoId(val);
+      if (directId) {
+        playVideo({ id: directId, title: "Lien YouTube direct", uploader: "Lien direct" });
         return;
       }
 
-      renderVideos(results.filter(r => r.type === 'video' || r.videoId));
+      // Unselect all chips
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      searchVideos(val);
     }
 
-    function renderVideos(videos) {
+    function selectChip(btn, action) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      action();
+    }
+
+    // Render Grid
+    function renderGrid(videos) {
       const grid = document.getElementById('video-grid');
       grid.innerHTML = '';
 
-      if (videos.length === 0) {
-        grid.innerHTML = '<div class="empty-state">Aucune vidéo trouvée.</div>';
-        return;
-      }
-
       videos.forEach(v => {
-        const id = v.videoId;
-        if (!id) return;
-        const title = v.title || 'Vidéo sans titre';
-        const author = v.author || 'Chaîne';
-        const thumb = v.videoThumbnails?.find(t => t.quality === 'medium')?.url || `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
-        const duration = formatDuration(v.lengthSeconds);
+        const viewsText = formatViews(v.views);
+        const durationText = formatDuration(v.duration);
+        const videoObj = { ...v, viewsText };
 
         const card = document.createElement('div');
         card.className = 'video-card';
-        card.onclick = () => playVideo(id, title);
+        card.onclick = () => playVideo(videoObj);
         card.innerHTML = `
-          <div class="card-thumb">
-            <img src="${thumb}" alt="${title}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'">
-            ${duration ? `<span class="card-duration">${duration}</span>` : ''}
+          <div class="thumb-wrapper">
+            <img class="thumb-img" src="${escapeHtml(v.thumbnail)}" alt="${escapeHtml(v.title)}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${v.id}/hqdefault.jpg'">
+            ${durationText ? `<span class="video-duration">${durationText}</span>` : ''}
           </div>
-          <div class="card-info">
-            <div class="card-title" title="${title}">${title}</div>
-            <div class="card-author">${author}</div>
+          <div class="video-meta">
+            ${v.avatar ? `<img class="channel-avatar" src="${escapeHtml(v.avatar)}" alt="" loading="lazy">` : `<div class="channel-avatar" style="background:#333;"></div>`}
+            <div class="video-info">
+              <div class="video-title" title="${escapeHtml(v.title)}">${escapeHtml(v.title)}</div>
+              <div class="channel-title">${escapeHtml(v.uploader || 'Chaîne')}</div>
+              <div class="video-substats">
+                ${viewsText ? `<span>${viewsText}</span>` : ''}
+                ${viewsText && v.uploadedText ? `<span>•</span>` : ''}
+                ${v.uploadedText ? `<span>${escapeHtml(v.uploadedText)}</span>` : ''}
+              </div>
+            </div>
           </div>
         `;
         grid.appendChild(card);
       });
     }
 
+    function formatViews(views) {
+      if (!views && views !== 0) return '';
+      if (views >= 1000000) return (views / 1000000).toFixed(1).replace('.0', '') + ' M de vues';
+      if (views >= 1000) return (views / 1000).toFixed(0) + ' k de vues';
+      return views + ' vues';
+    }
+
     function formatDuration(sec) {
-      if (!sec) return '';
-      const m = Math.floor(sec / 60);
+      if (!sec && sec !== 0) return '';
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
       const s = Math.floor(sec % 60);
+      if (h > 0) {
+        return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+      }
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    // Auto load trending / popular on start
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Startup: load real trending immediately
     window.addEventListener('DOMContentLoaded', () => {
-      quickSearch('musique tendance');
+      loadTrending();
     });
   </script>
 </body>
