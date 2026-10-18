@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Web Player — Débloqué</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff0000'><path d='M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z'/></svg>">
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1e1e1e;
+      --surface-2: #282828;
+      --text: #f1f1f1;
+      --text-muted: #aaaaaa;
+      --accent: #ff0000;
+      --accent-hover: #cc0000;
+      --border: #383838;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(15, 15, 15, 0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand svg { width: 28px; height: 28px; fill: var(--accent); }
+
+    .search-box {
+      flex: 1;
+      max-width: 650px;
+      display: flex;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px 0 0 24px;
+      padding: 10px 18px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: #3ea6ff;
+    }
+
+    .search-box button {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 24px 24px 0;
+      padding: 0 22px;
+      cursor: pointer;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .search-box button:hover { background: #333333; }
+
+    .engine-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Player Container */
+    #player-section {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--surface);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 ratio */
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .video-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .engine-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .engine-switcher select {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    /* Info notice for work bypass */
+    .notice {
+      background: #182230;
+      border: 1px solid #1f3a5f;
+      color: #93c5fd;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .notice strong { color: #bfdbfe; }
+
+    /* Results Grid */
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      border-color: var(--border);
+    }
+
+    .card-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .card-info {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-author {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    /* Preset Quick Picks */
+    .quick-tags {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .quick-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .quick-tag:hover { background: var(--surface-2); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="#" class="brand" onclick="location.reload()">
+      <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      <span>YT Web</span>
+    </a>
+
+    <form class="search-box" id="search-form" onsubmit="handleSearch(event)">
+      <input type="text" id="search-input" placeholder="Rechercher une vidéo ou coller un lien YouTube..." autocomplete="off">
+      <button type="submit" title="Rechercher">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      </button>
+    </form>
+
+    <select class="engine-select" id="engine-selector" onchange="onEngineChange()">
+      <option value="nocookie">Mode 1: YouTube NoCookie (Bypass standard)</option>
+      <option value="yewtu">Mode 2: Invidious (yewtu.be)</option>
+      <option value="nadeko">Mode 3: Invidious (nadeko.net)</option>
+      <option value="piped">Mode 4: Piped (piped.video)</option>
+    </select>
+  </header>
+
+  <main>
+    <div class="notice">
+      💡 <strong>Astuce Contournement Travail</strong> : Si le domaine <code>youtube.com</code> est bloqué sur votre réseau, le <strong>Mode 1 (YouTube NoCookie)</strong> fonctionne souvent car les entreprises l'autorisent pour les formations. Si celui-ci est également bloqué, basculez sur <strong>Invidious (Mode 2 ou 3)</strong> ou <strong>Piped (Mode 4)</strong> qui passent par des serveurs tiers indépendants sans traqueur ni pub.
+    </div>
+
+    <!-- Active Player Section -->
+    <section id="player-section">
+      <div class="video-wrapper">
+        <iframe id="video-frame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+      <div class="player-controls">
+        <div class="video-title" id="current-video-title">Lecture en cours</div>
+        <div class="engine-switcher">
+          <span>Lecteur utilisé :</span>
+          <select id="player-engine-select" onchange="switchCurrentPlayer(this.value)">
+            <option value="nocookie">YouTube NoCookie</option>
+            <option value="yewtu">Invidious (yewtu.be)</option>
+            <option value="nadeko">Invidious (nadeko.net)</option>
+            <option value="piped">Piped (piped.video)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Suggestions -->
+    <div class="quick-tags">
+      <button class="quick-tag" onclick="quickSearch('Lofi hip hop radio')">🎧 Lofi Radio</button>
+      <button class="quick-tag" onclick="quickSearch('Documentaire science')">🔬 Science</button>
+      <button class="quick-tag" onclick="quickSearch('Gaming fr')">🎮 Gaming</button>
+      <button class="quick-tag" onclick="quickSearch('Musique electro 2026')">🎵 Musique</button>
+      <button class="quick-tag" onclick="quickSearch('Actualités')">📰 Actualités</button>
+    </div>
+
+    <!-- Videos Grid / Search Results -->
+    <section>
+      <div class="section-title" id="results-title">Vidéos Populaires</div>
+      <div class="video-grid" id="video-grid">
+        <div class="empty-state">Chargement des vidéos...</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let currentVideoId = '';
+    let currentEngine = 'nocookie';
+
+    const ENGINES = {
+      nocookie: id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`,
+      yewtu: id => `https://yewtu.be/embed/${id}?autoplay=1`,
+      nadeko: id => `https://inv.nadeko.net/embed/${id}?autoplay=1`,
+      piped: id => `https://piped.video/embed/${id}?autoplay=1`
+    };
+
+    function extractVideoId(urlOrId) {
+      if (!urlOrId) return null;
+      urlOrId = urlOrId.trim();
+      if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
+      const patterns = [
+        /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/|yewtu\.be\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+        /v=([a-zA-Z0-9_-]{11})/
+      ];
+      for (const p of patterns) {
+        const m = urlOrId.match(p);
+        if (m) return m[1];
+      }
+      return null;
+    }
+
+    function playVideo(id, title = '') {
+      currentVideoId = id;
+      const engine = document.getElementById('engine-selector').value;
+      currentEngine = engine;
+      document.getElementById('player-engine-select').value = engine;
+
+      const frame = document.getElementById('video-frame');
+      frame.src = ENGINES[engine](id);
+
+      const section = document.getElementById('player-section');
+      section.style.display = 'flex';
+      document.getElementById('current-video-title').textContent = title || `Vidéo (ID: ${id})`;
+
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function switchCurrentPlayer(engine) {
+      currentEngine = engine;
+      document.getElementById('engine-selector').value = engine;
+      if (currentVideoId) {
+        document.getElementById('video-frame').src = ENGINES[engine](currentVideoId);
+      }
+    }
+
+    function onEngineChange() {
+      const engine = document.getElementById('engine-selector').value;
+      switchCurrentPlayer(engine);
+    }
+
+    async function handleSearch(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('search-input').value.trim();
+      if (!input) return;
+
+      const directId = extractVideoId(input);
+      if (directId) {
+        playVideo(directId, "Lien YouTube direct");
+        return;
+      }
+
+      await fetchSearchResults(input);
+    }
+
+    function quickSearch(query) {
+      document.getElementById('search-input').value = query;
+      fetchSearchResults(query);
+    }
+
+    async function fetchSearchResults(query) {
+      const grid = document.getElementById('video-grid');
+      document.getElementById('results-title').textContent = `Résultats pour "${query}"`;
+      grid.innerHTML = '<div class="empty-state">Recherche en cours...</div>';
+
+      const instances = [
+        'https://inv.nadeko.net/api/v1/search?q=',
+        'https://invidious.nerdvpn.de/api/v1/search?q=',
+        'https://yewtu.be/api/v1/search?q='
+      ];
+
+      let results = null;
+      for (const inst of instances) {
+        try {
+          const res = await fetch(inst + encodeURIComponent(query), { signal: AbortSignal.timeout(5000) });
+          if (res.ok) {
+            results = await res.json();
+            break;
+          }
+        } catch (_) {}
+      }
+
+      if (!results || !Array.isArray(results) || results.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <p>Impossible de joindre le moteur de recherche automatique.</p>
+            <p style="margin-top: 8px; font-size: 0.9rem;">Vous pouvez toujours <strong>coller directement un lien YouTube</strong> dans la barre ci-dessus pour lancer la vidéo !</p>
+          </div>`;
+        return;
+      }
+
+      renderVideos(results.filter(r => r.type === 'video' || r.videoId));
+    }
+
+    function renderVideos(videos) {
+      const grid = document.getElementById('video-grid');
+      grid.innerHTML = '';
+
+      if (videos.length === 0) {
+        grid.innerHTML = '<div class="empty-state">Aucune vidéo trouvée.</div>';
+        return;
+      }
+
+      videos.forEach(v => {
+        const id = v.videoId;
+        if (!id) return;
+        const title = v.title || 'Vidéo sans titre';
+        const author = v.author || 'Chaîne';
+        const thumb = v.videoThumbnails?.find(t => t.quality === 'medium')?.url || `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+        const duration = formatDuration(v.lengthSeconds);
+
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.onclick = () => playVideo(id, title);
+        card.innerHTML = `
+          <div class="card-thumb">
+            <img src="${thumb}" alt="${title}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'">
+            ${duration ? `<span class="card-duration">${duration}</span>` : ''}
+          </div>
+          <div class="card-info">
+            <div class="card-title" title="${title}">${title}</div>
+            <div class="card-author">${author}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function formatDuration(sec) {
+      if (!sec) return '';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // Auto load trending / popular on start
+    window.addEventListener('DOMContentLoaded', () => {
+      quickSearch('musique tendance');
+    });
+  </script>
+</body>
+</html>
