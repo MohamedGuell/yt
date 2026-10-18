@@ -50,7 +50,25 @@
     .header-left {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 10px;
+    }
+
+    .nav-back-btn {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+
+    .nav-back-btn:hover:not(:disabled) {
+      background: var(--surface-hover);
     }
 
     .brand {
@@ -63,6 +81,7 @@
       letter-spacing: -0.5px;
       font-size: 1.15rem;
       font-weight: 700;
+      user-select: none;
     }
 
     .brand svg {
@@ -204,7 +223,7 @@
       padding: 20px 24px 60px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
     /* Theater Player Section */
@@ -240,7 +259,7 @@
       padding: 16px 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .player-title-row {
@@ -279,7 +298,7 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
-      padding-top: 6px;
+      padding-top: 10px;
       border-top: 1px solid rgba(255,255,255,0.08);
     }
 
@@ -287,19 +306,37 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background 0.15s ease;
+    }
+
+    .player-channel:hover {
+      background: var(--surface-hover);
     }
 
     .player-channel-avatar {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: #333;
       object-fit: cover;
+      border: 1px solid var(--border);
     }
 
     .player-channel-name {
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.98rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .player-channel-cta {
+      font-size: 0.78rem;
+      color: #3ea6ff;
     }
 
     .player-engine-controls {
@@ -320,12 +357,167 @@
       cursor: pointer;
     }
 
-    /* Section Title */
+    /* Channel Profile View Header */
+    #channel-header-section {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .channel-banner-wrapper {
+      width: 100%;
+      height: 180px;
+      max-height: 220px;
+      background: linear-gradient(135deg, #1f1f1f, #2e2e2e);
+      overflow: hidden;
+      display: none;
+    }
+
+    .channel-banner-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .channel-profile-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 24px;
+      flex-wrap: wrap;
+    }
+
+    .channel-profile-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .channel-profile-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #252525;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .channel-profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .channel-profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .channel-profile-name {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .channel-verified-badge {
+      background: #717171;
+      color: #fff;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .channel-profile-meta {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .channel-profile-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      max-width: 700px;
+      margin-top: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .subscribe-btn {
+      background: #f1f1f1;
+      color: #0f0f0f;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border-radius: 24px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .subscribe-btn:hover {
+      background: #d9d9d9;
+    }
+
+    .subscribe-btn.subscribed {
+      background: #272727;
+      color: #f1f1f1;
+      border: 1px solid var(--border);
+    }
+
+    /* Section Title & Nav Back Bar */
     .feed-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
+      gap: 12px;
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
+
+    .feed-title-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feed-back-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: var(--chip-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 7px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .feed-back-btn:hover {
+      background: var(--chip-hover);
+      border-color: #444;
     }
 
     .feed-title {
@@ -340,7 +532,7 @@
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 20px 16px;
+      gap: 22px 16px;
     }
 
     @media (min-width: 1400px) {
@@ -383,7 +575,7 @@
       position: absolute;
       bottom: 8px;
       right: 8px;
-      background: rgba(0, 0, 0, 0.82);
+      background: rgba(0, 0, 0, 0.84);
       color: #fff;
       font-size: 0.75rem;
       font-weight: 600;
@@ -398,13 +590,23 @@
       align-items: flex-start;
     }
 
+    .avatar-clickable {
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+
+    .avatar-clickable:hover {
+      transform: scale(1.08);
+    }
+
     .channel-avatar {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: #252525;
       object-fit: cover;
-      flex-shrink: 0;
+      display: block;
     }
 
     .video-info {
@@ -412,6 +614,7 @@
       flex-direction: column;
       gap: 4px;
       overflow: hidden;
+      flex: 1;
     }
 
     .video-title {
@@ -426,15 +629,19 @@
     }
 
     .channel-title {
-      font-size: 0.82rem;
+      font-size: 0.83rem;
       color: var(--text-muted);
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 4px;
+      cursor: pointer;
+      width: fit-content;
+      transition: color 0.15s ease;
     }
 
     .channel-title:hover {
       color: var(--text);
+      text-decoration: underline;
     }
 
     .video-substats {
@@ -496,15 +703,22 @@
       .header-right { display: none; }
       main { padding: 12px; }
       .chips-bar { padding: 10px 12px; }
+      .channel-banner-wrapper { height: 110px; }
+      .channel-profile-card { padding: 14px 16px; }
+      .channel-profile-avatar { width: 56px; height: 56px; }
+      .channel-profile-name { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Bar -->
+  <!-- Top Navigation Bar -->
   <header>
     <div class="header-left">
-      <a class="brand" onclick="loadTrending()">
+      <button class="nav-back-btn" id="nav-back-btn" onclick="goBack()" title="Revenir en arrière" style="opacity: 0.35; cursor: default;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
+      <a class="brand" onclick="goHome()" title="Accueil YouTube">
         <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
         <span>YouTube</span>
       </a>
@@ -535,13 +749,13 @@
 
   <!-- Category Chips -->
   <nav class="chips-bar" id="chips-bar">
-    <button class="chip active" onclick="selectChip(this, () => loadTrending())">🔥 Tendances</button>
-    <button class="chip" onclick="selectChip(this, () => searchVideos('Musique 2026'))">🎵 Musique</button>
-    <button class="chip" onclick="selectChip(this, () => searchVideos('Jeux vidéo gaming fr'))">🎮 Jeux vidéo</button>
-    <button class="chip" onclick="selectChip(this, () => searchVideos('Documentaire science'))">🔬 Science</button>
-    <button class="chip" onclick="selectChip(this, () => searchVideos('Lofi hip hop live'))">🎧 Lofi</button>
-    <button class="chip" onclick="selectChip(this, () => searchVideos('Actualités France'))">📰 Actualités</button>
-    <button class="chip" onclick="selectChip(this, () => searchVideos('Tech informatique programmation'))">💻 Informatique</button>
+    <button class="chip active" onclick="selectChip(this, () => loadTrending(true))">🔥 Tendances</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Musique 2026', true))">🎵 Musique</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Jeux vidéo gaming fr', true))">🎮 Jeux vidéo</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Documentaire science', true))">🔬 Science</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Lofi hip hop live', true))">🎧 Lofi</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Actualités France', true))">📰 Actualités</button>
+    <button class="chip" onclick="selectChip(this, () => searchVideos('Tech informatique programmation', true))">💻 Informatique</button>
   </nav>
 
   <!-- Main View -->
@@ -554,13 +768,16 @@
       <div class="player-details">
         <div class="player-title-row">
           <h2 class="player-video-title" id="player-title">Titre de la vidéo</h2>
-          <button class="close-player-btn" onclick="closePlayer()" title="Fermer le lecteur">✕</button>
+          <button class="close-player-btn" onclick="closePlayer(true)" title="Fermer le lecteur">✕</button>
         </div>
         <div class="player-meta-row">
-          <div class="player-channel">
+          <div class="player-channel" onclick="onPlayerChannelClick()" title="Cliquer pour accéder à la chaîne">
             <img class="player-channel-avatar" id="player-avatar" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'><circle cx='12' cy='12' r='10'/></svg>" alt="">
             <div>
-              <div class="player-channel-name" id="player-channel">Chaîne</div>
+              <div class="player-channel-name">
+                <span id="player-channel">Chaîne</span>
+                <span class="player-channel-cta">• Voir la chaîne →</span>
+              </div>
               <div style="font-size: 0.8rem; color: var(--text-muted);" id="player-stats">Lecture en cours</div>
             </div>
           </div>
@@ -576,11 +793,45 @@
       </div>
     </section>
 
-    <!-- Video Feed -->
+    <!-- Channel Profile Section -->
+    <section id="channel-header-section">
+      <div class="channel-banner-wrapper" id="channel-banner-wrapper">
+        <img id="channel-banner-img" class="channel-banner-img" src="" alt="Bannière de la chaîne">
+      </div>
+      <div class="channel-profile-card">
+        <div class="channel-profile-left">
+          <img id="channel-profile-avatar" class="channel-profile-avatar" src="" alt="Avatar">
+          <div class="channel-profile-info">
+            <div class="channel-profile-name-row">
+              <h2 id="channel-profile-name" class="channel-profile-name">Nom de la chaîne</h2>
+              <span id="channel-verified-badge" class="channel-verified-badge" title="Vérifié">✓</span>
+            </div>
+            <div class="channel-profile-meta">
+              <span id="channel-subscribers-count">0 abonnés</span>
+              <span>•</span>
+              <span id="channel-videos-count">Vidéos</span>
+            </div>
+            <p id="channel-profile-desc" class="channel-profile-desc"></p>
+          </div>
+        </div>
+        <div>
+          <button class="subscribe-btn" id="channel-sub-btn" onclick="toggleSubscribe(this)">S'abonner</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feed Header with Navigation Back Button -->
     <div class="feed-header">
-      <h1 class="feed-title" id="feed-title">🔥 Tendances</h1>
+      <div class="feed-title-container">
+        <button id="feed-back-btn" class="feed-back-btn" onclick="goBack()" title="Revenir en arrière">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          <span>Retour</span>
+        </button>
+        <h1 class="feed-title" id="feed-title">🔥 Tendances</h1>
+      </div>
     </div>
 
+    <!-- Video Grid -->
     <div class="video-grid" id="video-grid">
       <div class="loading-container">
         <div class="spinner"></div>
@@ -598,7 +849,11 @@
     ];
 
     let currentVideoId = '';
+    let currentVideoObj = null;
     let currentEngine = 'nocookie';
+    let currentView = { type: 'trending' };
+    let hasNavigated = false;
+    let currentVideoChannel = null;
 
     const ENGINES = {
       nocookie: id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`,
@@ -611,7 +866,7 @@
       let lastError = null;
       for (const base of PIPED_APIS) {
         try {
-          const res = await fetch(base + endpoint, { signal: AbortSignal.timeout(6000) });
+          const res = await fetch(base + endpoint, { signal: AbortSignal.timeout(6500) });
           if (res.ok) {
             return await res.json();
           }
@@ -622,7 +877,7 @@
       throw lastError || new Error("API non joignable");
     }
 
-    // Video ID extractor (supports standard, shorts, youtu.be, embed, or raw 11 chars)
+    // Video ID extractor
     function extractVideoId(input) {
       if (!input) return null;
       input = input.trim();
@@ -638,9 +893,92 @@
       return null;
     }
 
+    // Navigation & Back handler
+    function updateNavButtons() {
+      const isHome = currentView.type === 'trending' && !currentVideoId;
+      const navBack = document.getElementById('nav-back-btn');
+      const feedBack = document.getElementById('feed-back-btn');
+
+      if (navBack) {
+        if (!isHome || hasNavigated) {
+          navBack.style.opacity = '1';
+          navBack.style.cursor = 'pointer';
+        } else {
+          navBack.style.opacity = '0.35';
+          navBack.style.cursor = 'default';
+        }
+      }
+
+      if (feedBack) {
+        feedBack.style.display = isHome ? 'none' : 'inline-flex';
+      }
+    }
+
+    function goBack() {
+      if (hasNavigated && window.history.length > 1) {
+        window.history.back();
+      } else {
+        if (currentVideoId) {
+          closePlayer(false);
+        } else {
+          goHome();
+        }
+      }
+    }
+
+    function goHome() {
+      closePlayer(false);
+      clearChannelHeader();
+      document.getElementById('search-input').value = '';
+      document.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+      loadTrending(true);
+    }
+
+    // Handle Browser History (Back / Forward buttons)
+    window.addEventListener('popstate', (e) => {
+      const state = e.state;
+      if (!state || state.view === 'trending') {
+        closePlayer(false);
+        clearChannelHeader();
+        loadTrending(false);
+      } else if (state.view === 'search') {
+        closePlayer(false);
+        clearChannelHeader();
+        document.getElementById('search-input').value = state.query || '';
+        searchVideos(state.query, false);
+      } else if (state.view === 'channel') {
+        closePlayer(false);
+        openChannel(state.channelId, state.channelName, state.avatarUrl, false);
+      } else if (state.view === 'player') {
+        if (state.video) {
+          playVideo(state.video, false);
+        }
+      }
+      updateNavButtons();
+    });
+
     // Play video in theater mode
-    function playVideo(video) {
+    function playVideo(video, push = true) {
+      if (!video || !video.id) return;
       currentVideoId = video.id;
+      currentVideoObj = video;
+
+      currentVideoChannel = {
+        id: video.channelId || (video.uploaderUrl || '').replace('/channel/', ''),
+        name: video.uploader || 'Chaîne YouTube',
+        avatar: video.avatar || ''
+      };
+
+      if (push) {
+        history.pushState(
+          { view: 'player', video, prevView: currentView },
+          '',
+          `?v=${video.id}`
+        );
+        hasNavigated = true;
+      }
+      updateNavButtons();
+
       const engine = document.getElementById('global-engine').value;
       currentEngine = engine;
       document.getElementById('player-engine-select').value = engine;
@@ -650,16 +988,24 @@
 
       document.getElementById('player-title').textContent = video.title || 'Vidéo';
       document.getElementById('player-channel').textContent = video.uploader || 'Chaîne YouTube';
-      document.getElementById('player-stats').textContent = [video.viewsText, video.uploadedText].filter(Boolean).join(' • ');
+      document.getElementById('player-stats').textContent = [video.viewsText, video.uploadedText].filter(Boolean).join(' • ') || 'Lecture en cours';
       
       const avatarEl = document.getElementById('player-avatar');
       if (video.avatar) {
         avatarEl.src = video.avatar;
+      } else {
+        avatarEl.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'><circle cx='12' cy='12' r='10'/></svg>";
       }
 
       const playerSec = document.getElementById('player-section');
       playerSec.style.display = 'flex';
       playerSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function onPlayerChannelClick() {
+      if (currentVideoChannel && (currentVideoChannel.id || currentVideoChannel.name)) {
+        openChannel(currentVideoChannel.id, currentVideoChannel.name, currentVideoChannel.avatar, true);
+      }
     }
 
     function switchEngine(engine) {
@@ -675,15 +1021,38 @@
       switchEngine(val);
     }
 
-    function closePlayer() {
+    function closePlayer(popHistory = false) {
       const playerSec = document.getElementById('player-section');
       playerSec.style.display = 'none';
       document.getElementById('video-frame').src = '';
       currentVideoId = '';
+      currentVideoObj = null;
+
+      if (popHistory && window.history.state && window.history.state.view === 'player') {
+        window.history.back();
+      } else {
+        // Restore appropriate URL for current view
+        if (currentView.type === 'trending') {
+          window.history.replaceState({ view: 'trending' }, '', window.location.pathname);
+        } else if (currentView.type === 'search') {
+          window.history.replaceState({ view: 'search', query: currentView.query }, '', `?q=${encodeURIComponent(currentView.query)}`);
+        } else if (currentView.type === 'channel') {
+          window.history.replaceState({ view: 'channel', channelId: currentView.channelId, channelName: currentView.channelName, avatarUrl: currentView.avatarUrl }, '', `?c=${encodeURIComponent(currentView.channelId)}&name=${encodeURIComponent(currentView.channelName || '')}`);
+        }
+      }
+      updateNavButtons();
     }
 
     // Load Trending Videos
-    async function loadTrending() {
+    async function loadTrending(push = true) {
+      if (push) {
+        history.pushState({ view: 'trending' }, '', window.location.pathname);
+        hasNavigated = true;
+      }
+      currentView = { type: 'trending' };
+      clearChannelHeader();
+      updateNavButtons();
+
       const grid = document.getElementById('video-grid');
       const title = document.getElementById('feed-title');
       title.textContent = '🔥 Tendances (France)';
@@ -697,16 +1066,21 @@
         const data = await apiRequest('/trending?region=FR');
         if (!Array.isArray(data) || data.length === 0) throw new Error("Aucun résultat");
         
-        const items = data.map(item => ({
-          id: (item.url || '').replace('/watch?v=', ''),
-          title: item.title,
-          thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
-          duration: item.duration,
-          uploader: item.uploaderName,
-          avatar: item.uploaderAvatar,
-          views: item.views,
-          uploadedText: item.uploadedDate || ''
-        })).filter(x => x.id && x.title);
+        const items = data.map(item => {
+          const chId = (item.uploaderUrl || '').replace('/channel/', '');
+          return {
+            id: (item.url || '').replace('/watch?v=', ''),
+            title: item.title,
+            thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
+            duration: item.duration,
+            uploader: item.uploaderName,
+            uploaderUrl: item.uploaderUrl,
+            channelId: chId,
+            avatar: item.uploaderAvatar,
+            views: item.views,
+            uploadedText: item.uploadedDate || ''
+          };
+        }).filter(x => x.id && x.title);
 
         renderGrid(items);
       } catch (err) {
@@ -714,13 +1088,24 @@
         grid.innerHTML = `
           <div class="error-container">
             <p>Impossible de charger les tendances en direct.</p>
-            <button class="error-btn" onclick="loadTrending()">Réessayer</button>
+            <button class="error-btn" onclick="loadTrending(false)">Réessayer</button>
           </div>`;
       }
     }
 
     // Search Videos
-    async function searchVideos(query) {
+    async function searchVideos(query, push = true) {
+      if (!query || !query.trim()) return;
+      query = query.trim();
+
+      if (push) {
+        history.pushState({ view: 'search', query }, '', `?q=${encodeURIComponent(query)}`);
+        hasNavigated = true;
+      }
+      currentView = { type: 'search', query };
+      clearChannelHeader();
+      updateNavButtons();
+
       const grid = document.getElementById('video-grid');
       const title = document.getElementById('feed-title');
       title.textContent = `Résultats pour "${query}"`;
@@ -734,7 +1119,13 @@
         const data = await apiRequest(`/search?q=${encodeURIComponent(query)}&filter=all`);
         const streams = (data.items || []).filter(x => x.type === 'stream' || (x.url && x.url.includes('/watch?v=')));
 
-        if (streams.length === 0) {
+        // If there is an exact/relevant channel result, preview it at top
+        const channelItem = (data.items || []).find(x => x.type === 'channel');
+        if (channelItem) {
+          showSearchChannelPreview(channelItem);
+        }
+
+        if (streams.length === 0 && !channelItem) {
           grid.innerHTML = `
             <div class="error-container">
               <p>Aucune vidéo trouvée pour "${escapeHtml(query)}".</p>
@@ -742,16 +1133,21 @@
           return;
         }
 
-        const items = streams.map(item => ({
-          id: (item.url || '').replace('/watch?v=', ''),
-          title: item.title,
-          thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
-          duration: item.duration,
-          uploader: item.uploaderName,
-          avatar: item.uploaderAvatar,
-          views: item.views,
-          uploadedText: item.uploadedDate || ''
-        })).filter(x => x.id && x.title);
+        const items = streams.map(item => {
+          const chId = (item.uploaderUrl || '').replace('/channel/', '');
+          return {
+            id: (item.url || '').replace('/watch?v=', ''),
+            title: item.title,
+            thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
+            duration: item.duration,
+            uploader: item.uploaderName,
+            uploaderUrl: item.uploaderUrl,
+            channelId: chId,
+            avatar: item.uploaderAvatar,
+            views: item.views,
+            uploadedText: item.uploadedDate || ''
+          };
+        }).filter(x => x.id && x.title);
 
         renderGrid(items);
       } catch (err) {
@@ -759,8 +1155,204 @@
         grid.innerHTML = `
           <div class="error-container">
             <p>Erreur lors de la recherche.</p>
-            <button class="error-btn" onclick="searchVideos('${escapeHtml(query)}')">Réessayer</button>
+            <button class="error-btn" onclick="searchVideos('${escapeHtml(query)}', false)">Réessayer</button>
           </div>`;
+      }
+    }
+
+    function showSearchChannelPreview(ch) {
+      const channelSection = document.getElementById('channel-header-section');
+      channelSection.style.display = 'block';
+      document.getElementById('channel-banner-wrapper').style.display = 'none';
+
+      document.getElementById('channel-profile-avatar').src = ch.thumbnail || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"><circle cx="12" cy="12" r="10"/></svg>';
+      document.getElementById('channel-profile-name').textContent = ch.name || 'Chaîne YouTube';
+      document.getElementById('channel-subscribers-count').textContent = ch.subscribers ? formatSubscribers(ch.subscribers) : 'Chaîne YouTube';
+      document.getElementById('channel-videos-count').textContent = 'Chaîne officielle';
+      document.getElementById('channel-profile-desc').textContent = ch.description || 'Cliquez pour ouvrir la chaîne et afficher toutes ses vidéos.';
+      document.getElementById('channel-verified-badge').style.display = ch.verified ? 'inline-flex' : 'none';
+
+      const chId = (ch.url || '').replace('/channel/', '');
+      const card = document.querySelector('.channel-profile-card');
+      card.style.cursor = 'pointer';
+      card.title = 'Ouvrir la page complète de la chaîne';
+      card.onclick = () => openChannel(chId, ch.name, ch.thumbnail, true);
+      updateSubButtonState(ch.name);
+    }
+
+    // Open Channel View
+    async function openChannel(channelId, channelName, avatarUrl, push = true) {
+      if (push) {
+        history.pushState(
+          { view: 'channel', channelId, channelName, avatarUrl },
+          '',
+          `?c=${encodeURIComponent(channelId || '')}&name=${encodeURIComponent(channelName || '')}`
+        );
+        hasNavigated = true;
+      }
+      currentView = { type: 'channel', channelId, channelName, avatarUrl };
+      updateNavButtons();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const channelSection = document.getElementById('channel-header-section');
+      channelSection.style.display = 'block';
+
+      const avatarEl = document.getElementById('channel-profile-avatar');
+      avatarEl.src = avatarUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"><circle cx="12" cy="12" r="10"/></svg>';
+      document.getElementById('channel-profile-name').textContent = channelName || 'Chaîne YouTube';
+      document.getElementById('channel-subscribers-count').textContent = 'Chargement de la chaîne...';
+      document.getElementById('channel-profile-desc').textContent = '';
+      document.getElementById('channel-banner-wrapper').style.display = 'none';
+
+      const card = document.querySelector('.channel-profile-card');
+      card.style.cursor = 'default';
+      card.onclick = null;
+      updateSubButtonState(channelName);
+
+      const title = document.getElementById('feed-title');
+      title.textContent = `Vidéos de ${channelName || 'la chaîne'}`;
+
+      const grid = document.getElementById('video-grid');
+      grid.innerHTML = `
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement des vidéos de ${escapeHtml(channelName || 'la chaîne')}...</p>
+        </div>`;
+
+      try {
+        let chData = null;
+        if (channelId && channelId.startsWith('UC')) {
+          chData = await apiRequest(`/channel/${channelId}`).catch(() => null);
+        }
+
+        if (chData) {
+          if (chData.name) {
+            document.getElementById('channel-profile-name').textContent = chData.name;
+            channelName = chData.name;
+          }
+          if (chData.avatarUrl) avatarEl.src = chData.avatarUrl;
+          if (chData.bannerUrl) {
+            document.getElementById('channel-banner-img').src = chData.bannerUrl;
+            document.getElementById('channel-banner-wrapper').style.display = 'block';
+          }
+          if (chData.subscriberCount) {
+            document.getElementById('channel-subscribers-count').textContent = formatSubscribers(chData.subscriberCount);
+          } else {
+            document.getElementById('channel-subscribers-count').textContent = 'Chaîne YouTube';
+          }
+          if (chData.description) {
+            document.getElementById('channel-profile-desc').textContent = chData.description;
+          }
+          document.getElementById('channel-verified-badge').style.display = chData.verified ? 'inline-flex' : 'none';
+        } else {
+          document.getElementById('channel-subscribers-count').textContent = 'Chaîne YouTube';
+          document.getElementById('channel-verified-badge').style.display = 'none';
+        }
+
+        // Fetch channel videos
+        let videos = (chData && chData.relatedStreams && chData.relatedStreams.length > 0) ? chData.relatedStreams : [];
+
+        // If relatedStreams is empty, search videos by channel name
+        if (videos.length === 0) {
+          const queryName = channelName || (chData && chData.name);
+          if (queryName) {
+            const searchData = await apiRequest(`/search?q=${encodeURIComponent(queryName)}&filter=all`).catch(() => null);
+            if (searchData && searchData.items) {
+              videos = searchData.items.filter(x => x.type === 'stream' || (x.url && x.url.includes('/watch?v=')));
+            }
+          }
+        }
+
+        // Also check if channel tabs have shorts/videos if still empty
+        if (videos.length === 0 && chData && chData.tabs && chData.tabs.length > 0) {
+          for (const tab of chData.tabs) {
+            try {
+              const tabData = await apiRequest(`/channels/tabs?data=${encodeURIComponent(tab.data)}`);
+              if (tabData && tabData.content && tabData.content.length > 0) {
+                videos = videos.concat(tabData.content.filter(x => x.type === 'stream'));
+              }
+            } catch (_) {}
+            if (videos.length > 0) break;
+          }
+        }
+
+        if (videos.length === 0) {
+          grid.innerHTML = `
+            <div class="error-container">
+              <p>Aucune vidéo disponible pour cette chaîne.</p>
+            </div>`;
+          return;
+        }
+
+        document.getElementById('channel-videos-count').textContent = `${videos.length} vidéos trouvées`;
+
+        const items = videos.map(item => {
+          const vChId = (item.uploaderUrl || '').replace('/channel/', '') || channelId;
+          return {
+            id: (item.url || '').replace('/watch?v=', ''),
+            title: item.title,
+            thumbnail: item.thumbnail || `https://i.ytimg.com/vi/${(item.url || '').replace('/watch?v=', '')}/hqdefault.jpg`,
+            duration: item.duration,
+            uploader: item.uploaderName || channelName || (chData && chData.name),
+            uploaderUrl: item.uploaderUrl || (channelId ? `/channel/${channelId}` : ''),
+            channelId: vChId,
+            avatar: item.uploaderAvatar || (chData && chData.avatarUrl) || avatarUrl,
+            views: item.views,
+            uploadedText: item.uploadedDate || ''
+          };
+        }).filter(x => x.id && x.title);
+
+        renderGrid(items);
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `
+          <div class="error-container">
+            <p>Impossible de charger les vidéos de la chaîne.</p>
+            <button class="error-btn" onclick="openChannel('${escapeHtml(channelId)}', '${escapeHtml(channelName)}', '${escapeHtml(avatarUrl)}', false)">Réessayer</button>
+          </div>`;
+      }
+    }
+
+    function clearChannelHeader() {
+      const channelSection = document.getElementById('channel-header-section');
+      if (channelSection) {
+        channelSection.style.display = 'none';
+        const card = document.querySelector('.channel-profile-card');
+        if (card) {
+          card.style.cursor = 'default';
+          card.onclick = null;
+        }
+      }
+    }
+
+    function toggleSubscribe(btn) {
+      const chName = document.getElementById('channel-profile-name').textContent.trim();
+      const subs = JSON.parse(localStorage.getItem('yt_subscribed') || '[]');
+      const index = subs.indexOf(chName);
+      if (index === -1) {
+        subs.push(chName);
+        localStorage.setItem('yt_subscribed', JSON.stringify(subs));
+        btn.textContent = 'Abonné ✓';
+        btn.classList.add('subscribed');
+      } else {
+        subs.splice(index, 1);
+        localStorage.setItem('yt_subscribed', JSON.stringify(subs));
+        btn.textContent = "S'abonner";
+        btn.classList.remove('subscribed');
+      }
+    }
+
+    function updateSubButtonState(name) {
+      const btn = document.getElementById('channel-sub-btn');
+      if (!btn || !name) return;
+      const subs = JSON.parse(localStorage.getItem('yt_subscribed') || '[]');
+      if (subs.includes(name)) {
+        btn.textContent = 'Abonné ✓';
+        btn.classList.add('subscribed');
+      } else {
+        btn.textContent = "S'abonner";
+        btn.classList.remove('subscribed');
       }
     }
 
@@ -771,13 +1363,12 @@
 
       const directId = extractVideoId(val);
       if (directId) {
-        playVideo({ id: directId, title: "Lien YouTube direct", uploader: "Lien direct" });
+        playVideo({ id: directId, title: "Vidéo YouTube", uploader: "Lien direct" }, true);
         return;
       }
 
-      // Unselect all chips
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      searchVideos(val);
+      searchVideos(val, true);
     }
 
     function selectChip(btn, action) {
@@ -786,29 +1377,43 @@
       action();
     }
 
-    // Render Grid
+    // Render Video Grid
+    window._videoRegistry = {};
+
     function renderGrid(videos) {
       const grid = document.getElementById('video-grid');
       grid.innerHTML = '';
+      window._videoRegistry = {};
 
       videos.forEach(v => {
         const viewsText = formatViews(v.views);
         const durationText = formatDuration(v.duration);
         const videoObj = { ...v, viewsText };
+        window._videoRegistry[v.id] = videoObj;
 
         const card = document.createElement('div');
         card.className = 'video-card';
-        card.onclick = () => playVideo(videoObj);
+        card.onclick = (e) => {
+          if (e.target.closest('.channel-click-target')) return;
+          playVideo(videoObj, true);
+        };
+
+        const safeAvatar = v.avatar ? escapeHtml(v.avatar) : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23333"><circle cx="12" cy="12" r="10"/></svg>';
+
         card.innerHTML = `
           <div class="thumb-wrapper">
             <img class="thumb-img" src="${escapeHtml(v.thumbnail)}" alt="${escapeHtml(v.title)}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${v.id}/hqdefault.jpg'">
             ${durationText ? `<span class="video-duration">${durationText}</span>` : ''}
           </div>
           <div class="video-meta">
-            ${v.avatar ? `<img class="channel-avatar" src="${escapeHtml(v.avatar)}" alt="" loading="lazy">` : `<div class="channel-avatar" style="background:#333;"></div>`}
+            <div class="avatar-clickable channel-click-target" title="Accéder à la chaîne ${escapeHtml(v.uploader || '')}" onclick="openChannel('${escapeHtml(v.channelId || '')}', '${escapeHtml(v.uploader || '')}', '${safeAvatar}', true)">
+              <img class="channel-avatar" src="${safeAvatar}" alt="" loading="lazy">
+            </div>
             <div class="video-info">
               <div class="video-title" title="${escapeHtml(v.title)}">${escapeHtml(v.title)}</div>
-              <div class="channel-title">${escapeHtml(v.uploader || 'Chaîne')}</div>
+              <div class="channel-title channel-click-target" title="Accéder à la chaîne ${escapeHtml(v.uploader || '')}" onclick="openChannel('${escapeHtml(v.channelId || '')}', '${escapeHtml(v.uploader || '')}', '${safeAvatar}', true)">
+                <span>${escapeHtml(v.uploader || 'Chaîne')}</span>
+              </div>
               <div class="video-substats">
                 ${viewsText ? `<span>${viewsText}</span>` : ''}
                 ${viewsText && v.uploadedText ? `<span>•</span>` : ''}
@@ -823,9 +1428,16 @@
 
     function formatViews(views) {
       if (!views && views !== 0) return '';
-      if (views >= 1000000) return (views / 1000000).toFixed(1).replace('.0', '') + ' M de vues';
+      if (views >= 1000000) return (views / 1000000).toFixed(1).replace('.0', '').replace('.', ',') + ' M de vues';
       if (views >= 1000) return (views / 1000).toFixed(0) + ' k de vues';
       return views + ' vues';
+    }
+
+    function formatSubscribers(subs) {
+      if (!subs && subs !== 0) return '0 abonnés';
+      if (subs >= 1000000) return (subs / 1000000).toFixed(2).replace('.', ',').replace(',00', '') + ' M d\'abonnés';
+      if (subs >= 1000) return (subs / 1000).toFixed(0) + ' k d\'abonnés';
+      return subs + ' abonnés';
     }
 
     function formatDuration(sec) {
@@ -849,9 +1461,25 @@
         .replace(/'/g, '&#39;');
     }
 
-    // Startup: load real trending immediately
+    // Startup routing based on URL params
     window.addEventListener('DOMContentLoaded', () => {
-      loadTrending();
+      const params = new URLSearchParams(window.location.search);
+      const v = params.get('v');
+      const c = params.get('c');
+      const q = params.get('q');
+      const name = params.get('name');
+
+      if (v) {
+        loadTrending(false);
+        playVideo({ id: v, title: 'Vidéo YouTube', uploader: 'YouTube' }, false);
+      } else if (c) {
+        openChannel(c, name || 'Chaîne', '', false);
+      } else if (q) {
+        document.getElementById('search-input').value = q;
+        searchVideos(q, false);
+      } else {
+        loadTrending(false);
+      }
     });
   </script>
 </body>
