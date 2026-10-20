@@ -1121,6 +1121,47 @@
 
       // Charger les vidéos recommandées associées sans pub
       loadRelatedVideos(video.id);
+
+      // Enregistrer dans la progression / historique du profil
+      recordYtWatchHistory(video);
+    }
+
+    function recordYtWatchHistory(video) {
+      if (!video || !video.id) return;
+      const historyEntry = {
+        id: video.id,
+        title: video.title || 'Vidéo YouTube',
+        uploader: video.uploader || '',
+        thumb: video.thumbnail || `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`,
+        date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+      };
+
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'HUB_RECORD_WATCH', media: 'yt', item: historyEntry }, '*');
+      }
+
+      try {
+        const activeUser = localStorage.getItem('hub_active_user_v1');
+        const users = JSON.parse(localStorage.getItem('hub_users_v1') || '[]');
+        if (activeUser && users.length) {
+          const user = users.find(u => u.username === activeUser);
+          if (user) {
+            if (!user.history) user.history = {};
+            if (!user.history.yt) user.history.yt = [];
+            user.history.yt = user.history.yt.filter(x => x.id !== video.id);
+            user.history.yt.unshift(historyEntry);
+            user.history.yt = user.history.yt.slice(0, 30);
+            localStorage.setItem('hub_users_v1', JSON.stringify(users));
+          }
+        }
+        let localYtHist = JSON.parse(localStorage.getItem('yt_history_v1') || '[]');
+        localYtHist = localYtHist.filter(x => x.id !== video.id);
+        localYtHist.unshift(historyEntry);
+        localStorage.setItem('yt_history_v1', JSON.stringify(localYtHist.slice(0, 30)));
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     
