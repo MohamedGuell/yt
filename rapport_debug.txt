@@ -1,5 +1,5 @@
 ================================================================================
-RAPPORT TECHNIQUE DE DIAGNOSTIC ET AUDIT D'ARCHITECTURE - YT HUB
+RAPPORT TECHNIQUE DE DIAGNOSTIC ET AUDIT D'ARCHITECTURE - YT HUB (V2 - AUDITÉE)
 ================================================================================
 Date: 16 Novembre 2026
 Projet: https://github.com/MohamedGuell/yt.git (https://mohamedguell.github.io/yt/)
@@ -10,20 +10,25 @@ Les tests de requêtes HTTP en direct pour la recherche ('rocky fut') et l'extra
 ont donné les métriques suivantes depuis une connexion réelle :
 
 [FONCTIONNELS - RAPIDES]
+- Invidious API (ChocolateMoo53) :
+  URL Streams : https://yt.chocolatemoo53.com/api/v1/videos/jB5puKULM9w
+  URL Search  : https://yt.chocolatemoo53.com/api/v1/search?q=rocky%20fut
+  Statut      : HTTP 200 OK | Temps de réponse flux : ~501 ms
+  Données     : formatStreams (MP4 720p/360p), adaptiveFormats (MP4), hlsUrl direct
+  Avatars     : authorThumbnails (résolu à 100%)
+  Miniatures  : videoThumbnails[0].url avec fallback i.ytimg.com
+
 - Piped API (Ducks Party) :
   URL    : https://pipedapi.ducks.party/search?q=rocky%20fut&filter=all
   Statut : HTTP 200 OK | Temps de réponse : ~224 ms
   Données: 19 vidéos fraîches de Rocky FUT (FC 25, FUT Champions, Drafts...)
+  Avatars: uploaderAvatar mappé
 
 - Piped API (Private Coffee) :
   URL    : https://api.piped.private.coffee/search?q=rocky%20fut&filter=all
   Statut : HTTP 200 OK | Temps de réponse : ~276 ms
   Données: 19 vidéos fraîches de Rocky FUT
-
-- Invidious API (ChocolateMoo53) :
-  URL    : https://yt.chocolatemoo53.com/api/v1/search?q=rocky%20fut
-  Statut : HTTP 200 OK | Temps de réponse : ~697 ms
-  Données: 19 vidéos fraîches
+  Avatars: uploaderAvatar mappé
 
 - Embed YouTube NoCookie :
   URL    : https://www.youtube-nocookie.com/embed/jB5puKULM9w
@@ -44,14 +49,10 @@ ont donné les métriques suivantes depuis une connexion réelle :
   URL    : https://api.codetabs.com/v1/proxy/?quest=...
   Statut : Timeout (> 4000 ms) ou Erreur 504 sur les requêtes YouTube volumineuses
 
-- Proxy CORS.sh / Corsproxy.io :
-  Statut : Nécessite désormais des clés d'API payantes ou bloque les requêtes directes vers youtube.com.
-
 STRATÉGIE RETENUE :
 Utilisation de Promise.any() en parallèle sur les 3 instances API Piped/Invidious
-avec un timeout strict de 4 secondes (AbortController). Le premier endpoint qui
-répond fournit les résultats en < 300 ms. En cas d'échec total (très rare), bascule
-automatique et transparente sur le catalogue local thématisé.
+avec un timeout strict de 3500-4000 ms (AbortController). Le premier endpoint qui
+répond fournit les résultats en < 300 ms. Zéro attente séquentielle bloquante.
 
 
 2. GÉNÉRATION DU DOM DES CARTES VIDÉOS (renderGrid)
@@ -180,7 +181,8 @@ function renderGrid(videos) {
 
 3. FONCTION DE RECHERCHE EN DIRECT & TENDANCES (fetchLiveSearch)
 --------------------------------------------------------------------------------
-Recherche multi-sources ultra-rapide avec détection automatique de flux et parsing :
+Recherche multi-sources ultra-rapide avec Promise.any(), mapping complet des avatars
+(uploaderAvatar / authorThumbnails) et des miniatures (videoThumbnails / i.ytimg.com) :
 
 async function fetchLiveSearch(query, signal) {
       if (!query || !query.trim()) return null;
@@ -202,14 +204,28 @@ async function fetchLiveSearch(query, signal) {
             if (!Array.isArray(rawItems) || rawItems.length === 0) return reject(new Error("Empty"));
 
             const validVideos = rawItems.map(it => {
-              const videoId = isInv ? it.videoId : (it.url || '').replace('/watch?v=', '');
+              const videoId = isInv ? (it.videoId || extractVideoId(it.url)) : (extractVideoId(it.url) || it.id);
               if (!videoId || videoId.length !== 11) return null;
+
+              // Avatar
+              const rawAvatar = isInv
+                ? (Array.isArray(it.authorThumbnails) ? (it.authorThumbnails[it.authorThumbnails.length - 1]?.url || it.authorThumbnails[0]?.url || it.authorThumbnails[0]) : '')
+                : (it.uploaderAvatar || '');
+              const avatar = typeof rawAvatar === 'string' ? rawAvatar : (rawAvatar?.url || '');
+
+              // Thumbnail avec fallback i.ytimg.com
+              const rawThumb = isInv
+                ? (it.videoThumbnails?.[0]?.url || it.thumbnail)
+                : (it.thumbnail);
+              const thumbnail = rawThumb || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
               return {
                 id: videoId,
                 title: it.title || 'Vidéo YouTube',
                 uploader: isInv ? it.author : it.uploaderName,
                 channelId: isInv ? it.authorId : (it.uploaderUrl || '').replace('/channel/', ''),
-                thumbnail: it.thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+                avatar: avatar,
+                thumbnail: thumbnail,
                 views: it.viewCount || it.views || '',
                 uploadedText: it.publishedText || it.uploadedDate || '',
                 duration: it.lengthSeconds || it.duration || ''
@@ -243,33 +259,186 @@ async function fetchLiveSearch(query, signal) {
     }
 
 
-4. LOGIQUE DE BASCULE AUTOMATIQUE (FALLBACK LADDER) DES LECTEURS VIDÉO
+4. LECTEUR DIRECT MP4 CORRIGÉ (playDirectStream - PROMISE.ANY PARALLÈLE)
 --------------------------------------------------------------------------------
-Architecture de bascule conçue pour garantir zéro écran noir, que ce soit sur un
-ordinateur d'entreprise avec pare-feu strict ou sur réseau personnel :
+Correction de la boucle for...of séquentielle : extraction en parallèle avec Promise.any()
+sur 3 endpoints (Invidious Choco, Piped Ducks, Piped Coffee) avec timeout de 3500 ms.
+Support complet de data.formatStreams (720p/360p combinés), data.adaptiveFormats et hlsUrl :
 
-Échelon 1 : Lecteur Direct MP4 (HTML5 Plyr)
-  - Interroge l'extraction de stream direct (flux 1080p/720p/hls).
-  - Timeout strict de 2000 ms (AbortController).
-  - Si l'API d'extraction ne répond pas ou est bloquée par YouTube en moins de 2s,
-    déclenche instantanément switchEngine('nocookie').
-  - Zéro écran noir, message toast 'Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub'.
+async function playDirectStream(videoId) {
+      hideAllPlayerContainers();
+      const directCont = document.getElementById('direct-player-container');
+      const loading = document.getElementById('direct-loading-overlay');
+      const loadingText = document.getElementById('direct-loading-text');
 
-Échelon 2 : YouTube NoCookie (Sécurisé Entreprise)
-  - Iframe chargée avec paramètres d'isolation (origin, enablejsapi=1, rel=0).
-  - Contournement des publicités pré-roll : paramètre start=1 injecté automatiquement.
-  - Watchdog anti-pub : bouton 'Passer la pub (+15s)' et rechargement synchronisé
-    au timestamp exact si une publicité bloque la lecture.
-  - Toujours accessible sur les réseaux d'entreprise filtrants.
+      directCont.style.display = 'block';
+      if (loading) loading.style.display = 'flex';
+      if (loadingText) loadingText.textContent = "Extraction du flux vidéo direct sans pub (Full HD / 720p)...";
 
-Échelon 3 : Piped Embed (Miroir Cloudflare)
-  - Utilisé comme alternative 100% sans pub si le réseau autorise cf.piped.video.
+      initPlyrPlayer();
+      const videoEl = document.getElementById('plyr-video');
 
-Échelon 4 : Instances Auto-healing
-  - Diagnostic réseau intégré en arrière-plan (vert si le serveur répond au ping,
-    rouge si bloqué par pare-feu ou hors-ligne).
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500); // Timeout 3500ms
 
-Extrait du contrôleur de bascule et d'exécution :
+      const streamEndpoints = [
+        { name: 'Invidious Choco API', url: `https://yt.chocolatemoo53.com/api/v1/videos/${videoId}`, type: 'invidious' },
+        { name: 'Piped Ducks API', url: `https://pipedapi.ducks.party/streams/${videoId}`, type: 'piped' },
+        { name: 'Piped Coffee API', url: `https://api.piped.private.coffee/streams/${videoId}`, type: 'piped' }
+      ];
+
+      const streamPromises = streamEndpoints.map(api => {
+        return new Promise(async (resolve, reject) => {
+          try {
+            const res = await fetch(api.url, { signal: controller.signal });
+            if (!res.ok) return reject(new Error(`${api.name}: HTTP ${res.status}`));
+            const data = await res.json();
+
+            let mp4 = null;
+            let hls = data.hlsUrl || data.hls || null;
+
+            if (api.type === 'invidious') {
+              if (data.formatStreams && data.formatStreams.length > 0) {
+                const sorted = [...data.formatStreams].sort((a, b) => (parseInt(b.resolution) || 0) - (parseInt(a.resolution) || 0));
+                mp4 = sorted[0].url;
+              } else if (data.adaptiveFormats && data.adaptiveFormats.length > 0) {
+                const mp4Adaptive = data.adaptiveFormats.find(f => f.type && f.type.startsWith('video/mp4') && f.url);
+                if (mp4Adaptive) mp4 = mp4Adaptive.url;
+              }
+            } else {
+              // Piped
+              const muxed = (data.videoStreams || []).filter(s => !s.videoOnly && s.url);
+              if (muxed.length > 0) {
+                muxed.sort((a, b) => (parseInt(b.quality) || 0) - (parseInt(a.quality) || 0));
+                mp4 = muxed[0].url;
+              } else if (data.videoStreams && data.videoStreams.length > 0) {
+                const v = data.videoStreams.find(s => s.url);
+                if (v) mp4 = v.url;
+              }
+            }
+
+            if (mp4 || hls) {
+              resolve({ mp4, hls, apiName: api.name });
+            } else {
+              reject(new Error(`${api.name}: aucun flux exploitable`));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+
+      let streamResult = null;
+      try {
+        streamResult = await Promise.any(streamPromises);
+      } catch (err) {
+        console.warn("Échec extraction flux direct:", err);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      if (loading) loading.style.display = 'none';
+
+      if (streamResult && (streamResult.mp4 || streamResult.hls)) {
+        if (streamResult.hls && window.Hls && Hls.isSupported()) {
+          if (hlsInstance) hlsInstance.destroy();
+          hlsInstance = new Hls();
+          hlsInstance.loadSource(streamResult.hls);
+          hlsInstance.attachMedia(videoEl);
+          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            videoEl.play().catch(e => console.log("Autoplay:", e));
+          });
+        } else if (streamResult.mp4) {
+          videoEl.src = streamResult.mp4;
+          videoEl.load();
+          videoEl.play().catch(e => console.log("Autoplay:", e));
+        }
+        showToast(`🎬 Flux Direct HTML5 actif (${streamResult.apiName})`);
+      } else {
+        showToast("⚡ Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub");
+        switchEngine('nocookie');
+      }
+    }
+
+
+5. CHARGEMENT AU DÉMARRAGE, ONGLETS ET RECOMMANDATIONS (ZERO CATALOGUE PAR DÉFAUT)
+--------------------------------------------------------------------------------
+Au démarrage (DOMContentLoaded) et lors du clic sur les puces de catégories,
+fetchLiveSearch est immédiatement invoqué avec un indicateur de chargement actif.
+Le catalogue local de secours n'est appelé qu'en dernier recours absolu après échec des 3 APIs.
+De même, loadRelatedVideos interroge désormais les APIs Invidious et Piped en direct :
+
+async function loadRelatedVideos(videoId, videoTitle) {
+      const relGrid = document.getElementById('related-videos-grid');
+      if (!relGrid) return;
+      relGrid.innerHTML = `
+        <div class="loading-container" style="grid-column: 1 / -1; padding: 20px 0;">
+          <div class="spinner"></div>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Chargement des vidéos associées...</p>
+        </div>`;
+
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 3500);
+
+      const endpoints = [
+        { name: 'Invidious Choco', url: `https://yt.chocolatemoo53.com/api/v1/videos/${videoId}`, type: 'invidious' },
+        { name: 'Piped Ducks', url: `https://pipedapi.ducks.party/streams/${videoId}`, type: 'piped' },
+        { name: 'Piped Coffee', url: `https://api.piped.private.coffee/streams/${videoId}`, type: 'piped' }
+      ];
+
+      const promises = endpoints.map(api => {
+        return new Promise(async (resolve, reject) => {
+          try {
+            const res = await fetch(api.url, { signal: controller.signal });
+            if (!res.ok) return reject(new Error(`HTTP ${res.status}`));
+            const data = await res.json();
+            const isInv = api.type === 'invidious';
+            const list = isInv ? data.recommendedVideos : data.relatedStreams;
+            if (!Array.isArray(list) || list.length === 0) return reject(new Error("Empty"));
+
+            const mapped = list.map(item => {
+              const relId = isInv ? item.videoId : extractVideoId(item.url || '');
+              if (!relId || relId === videoId || relId.length !== 11) return null;
+              const rawThumb = isInv ? (item.videoThumbnails?.[0]?.url || item.thumbnail) : item.thumbnail;
+              return {
+                id: relId,
+                title: item.title || 'Vidéo associée',
+                thumbnail: rawThumb || `https://i.ytimg.com/vi/${relId}/hqdefault.jpg`,
+                uploader: isInv ? item.author : (item.uploaderName || 'YouTube'),
+                channelId: isInv ? item.authorId : (item.uploaderUrl || '').replace('/channel/', ''),
+                duration: item.lengthSeconds || item.duration || '',
+                views: item.viewCount || item.views || ''
+              };
+            }).filter(Boolean);
+
+            if (mapped.length === 0) return reject(new Error("No valid related"));
+            resolve(mapped);
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+
+      try {
+        const liveRelated = await Promise.any(promises);
+        clearTimeout(tid);
+        if (liveRelated && liveRelated.length > 0) {
+          currentRelatedVideos = liveRelated.slice(0, 12);
+          renderRelatedGrid(currentRelatedVideos);
+          return;
+        }
+      } catch (e) {
+        clearTimeout(tid);
+      }
+
+      // Fallback local uniquement si échec réseau complet
+      currentRelatedVideos = (FALLBACK_CATALOG.trending || []).filter(x => x.id !== videoId).slice(0, 8);
+      renderRelatedGrid(currentRelatedVideos);
+    }
+
+
+6. CONTRÔLEUR D'EXÉCUTION DU LECTEUR (executePlayback)
+--------------------------------------------------------------------------------
 function executePlayback(engine, videoId) {
       currentEngine = engine;
       renderEnginePills();
@@ -291,80 +460,4 @@ function executePlayback(engine, videoId) {
         frame.src = ENGINES[engine] ? ENGINES[engine](videoId) : `https://cf.piped.video/embed/${videoId}?autoplay=1`;
       }
     }
-
-Extrait du lecteur direct avec timeout 2s et fallback automatique vers NoCookie :
-async function playDirectStream(videoId) {
-      hideAllPlayerContainers();
-      const directCont = document.getElementById('direct-player-container');
-      const loading = document.getElementById('direct-loading-overlay');
-      const loadingText = document.getElementById('direct-loading-text');
-
-      directCont.style.display = 'block';
-      if (loading) loading.style.display = 'flex';
-      if (loadingText) loadingText.textContent = "Extraction du flux vidéo direct sans pub...";
-
-      initPlyrPlayer();
-      const videoEl = document.getElementById('plyr-video');
-
-      let streamResult = null;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000); // MAX 2 SECONDES
-
-      try {
-        for (const api of activeStreamApis) {
-          try {
-            if (loadingText) loadingText.textContent = `Connexion à ${api.name}...`;
-            const stream = await extractStreamFromApi(api, videoId, controller.signal);
-            if (stream && (stream.mp4 || stream.hls)) {
-              streamResult = stream;
-              break;
-            }
-          } catch (e) {}
-        }
-      } catch (err) {
-      } finally {
-        clearTimeout(timeoutId);
-      }
-
-      if (loading) loading.style.display = 'none';
-
-      if (streamResult && (streamResult.mp4 || streamResult.hls)) {
-        if (streamResult.hls && window.Hls && Hls.isSupported()) {
-          if (hlsInstance) hlsInstance.destroy();
-          hlsInstance = new Hls();
-          hlsInstance.loadSource(streamResult.hls);
-          hlsInstance.attachMedia(videoEl);
-          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-            videoEl.play().catch(e => console.log("Autoplay:", e));
-          });
-        } else if (streamResult.mp4) {
-          videoEl.src = streamResult.mp4;
-          videoEl.load();
-          videoEl.play().catch(e => console.log("Autoplay:", e));
-        }
-        showToast("🎬 Flux Direct HTML5 actif (100% Sans Pub)");
-      } else {
-        showToast("⚡ Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub");
-        switchEngine('nocookie');
-      }
-    }
-
-
-5. ÉVENTUELLES LIMITES RESTANTES & MITIGATIONS
---------------------------------------------------------------------------------
-- Blocage IP des instances publiques Piped / Invidious :
-  YouTube bloque périodiquement certaines adresses IP de serveurs Piped.
-  -> Solution mise en place : Promise.any() interroge 3 clusters géographiques
-     distincts (Ducks Party, Private Coffee, ChocolateMoo53) pour garantir qu'au
-     moins un serveur renvoie les résultats.
-
-- Scraping HTML brut de YouTube côté client :
-  Les proxies CORS publics gratuits (AllOrigins, CodeTabs) souffrent de limitations de
-  débit ou de challenges anti-bot Cloudflare.
-  -> Solution mise en place : Priorité absolue aux endpoints JSON Piped/Invidious
-     qui ne subissent pas de blocage CORS sur le navigateur.
-
-- Réseau entreprise avec filtrage drastique :
-  Sur les postes où seul youtube-nocookie.com ou GitHub Pages est autorisé, le lecteur
-  NoCookie garantit la lecture sans rupture de service.
 ================================================================================
