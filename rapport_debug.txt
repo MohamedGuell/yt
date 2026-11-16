@@ -252,8 +252,8 @@ ordinateur d'entreprise avec pare-feu strict ou sur réseau personnel :
   - Interroge l'extraction de stream direct (flux 1080p/720p/hls).
   - Timeout strict de 2000 ms (AbortController).
   - Si l'API d'extraction ne répond pas ou est bloquée par YouTube en moins de 2s,
-    déclenche instantanément autoFallbackToEmbed().
-  - Zéro écran noir, message toast 'Flux direct indisponible, bascule sur lecteur sécurisé'.
+    déclenche instantanément switchEngine('nocookie').
+  - Zéro écran noir, message toast 'Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub'.
 
 Échelon 2 : YouTube NoCookie (Sécurisé Entreprise)
   - Iframe chargée avec paramètres d'isolation (origin, enablejsapi=1, rel=0).
@@ -269,8 +269,85 @@ ordinateur d'entreprise avec pare-feu strict ou sur réseau personnel :
   - Diagnostic réseau intégré en arrière-plan (vert si le serveur répond au ping,
     rouge si bloqué par pare-feu ou hors-ligne).
 
-Extrait du contrôleur de bascule :
-// Not found: async function switchEngine(engineKey, keepTime = true)
+Extrait du contrôleur de bascule et d'exécution :
+function executePlayback(engine, videoId) {
+      currentEngine = engine;
+      renderEnginePills();
+
+      const adTools = document.getElementById('nocookie-ad-tools');
+      const workTip = document.getElementById('nocookie-work-tip');
+
+      if (adTools) adTools.style.display = (engine === 'nocookie') ? 'flex' : 'none';
+      if (workTip) workTip.style.display = (engine === 'nocookie') ? 'flex' : 'none';
+
+      if (engine === 'direct') {
+        playDirectStream(videoId);
+      } else if (engine === 'nocookie') {
+        loadYouTubeIframePlayer(videoId, 1);
+      } else {
+        hideAllPlayerContainers();
+        const frame = document.getElementById('video-frame');
+        frame.style.display = 'block';
+        frame.src = ENGINES[engine] ? ENGINES[engine](videoId) : `https://cf.piped.video/embed/${videoId}?autoplay=1`;
+      }
+    }
+
+Extrait du lecteur direct avec timeout 2s et fallback automatique vers NoCookie :
+async function playDirectStream(videoId) {
+      hideAllPlayerContainers();
+      const directCont = document.getElementById('direct-player-container');
+      const loading = document.getElementById('direct-loading-overlay');
+      const loadingText = document.getElementById('direct-loading-text');
+
+      directCont.style.display = 'block';
+      if (loading) loading.style.display = 'flex';
+      if (loadingText) loadingText.textContent = "Extraction du flux vidéo direct sans pub...";
+
+      initPlyrPlayer();
+      const videoEl = document.getElementById('plyr-video');
+
+      let streamResult = null;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // MAX 2 SECONDES
+
+      try {
+        for (const api of activeStreamApis) {
+          try {
+            if (loadingText) loadingText.textContent = `Connexion à ${api.name}...`;
+            const stream = await extractStreamFromApi(api, videoId, controller.signal);
+            if (stream && (stream.mp4 || stream.hls)) {
+              streamResult = stream;
+              break;
+            }
+          } catch (e) {}
+        }
+      } catch (err) {
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      if (loading) loading.style.display = 'none';
+
+      if (streamResult && (streamResult.mp4 || streamResult.hls)) {
+        if (streamResult.hls && window.Hls && Hls.isSupported()) {
+          if (hlsInstance) hlsInstance.destroy();
+          hlsInstance = new Hls();
+          hlsInstance.loadSource(streamResult.hls);
+          hlsInstance.attachMedia(videoEl);
+          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            videoEl.play().catch(e => console.log("Autoplay:", e));
+          });
+        } else if (streamResult.mp4) {
+          videoEl.src = streamResult.mp4;
+          videoEl.load();
+          videoEl.play().catch(e => console.log("Autoplay:", e));
+        }
+        showToast("🎬 Flux Direct HTML5 actif (100% Sans Pub)");
+      } else {
+        showToast("⚡ Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub");
+        switchEngine('nocookie');
+      }
+    }
 
 
 5. ÉVENTUELLES LIMITES RESTANTES & MITIGATIONS
