@@ -385,19 +385,20 @@
     }
 
     .btn-skip-timestamp {
-      background: var(--yt-red) !important;
+      background: linear-gradient(135deg, #ff0000, #cc0000) !important;
       color: #fff !important;
-      border: 1px solid #ff4444 !important;
-      font-weight: 700 !important;
-      padding: 7px 14px !important;
-      border-radius: 6px !important;
-      font-size: 0.85rem !important;
+      border: 2px solid #ff4444 !important;
+      font-weight: 800 !important;
+      padding: 9px 18px !important;
+      border-radius: 8px !important;
+      font-size: 0.92rem !important;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 10px rgba(255, 0, 0, 0.35);
-      transition: all 0.15s ease;
+      gap: 8px;
+      box-shadow: 0 0 14px rgba(255, 0, 0, 0.5);
+      letter-spacing: 0.3px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .btn-skip-timestamp:hover {
@@ -1189,13 +1190,15 @@
       <div class="engine-badge">
         <span>Lecteur :</span>
         <select id="global-engine" onchange="onGlobalEngineChange(this.value)">
-          <option value="cf_piped" selected>⚡ Piped Cloudflare (Sans Pub & Anti-Blocage Taff - Recommandé)</option>
-          <option value="direct">🎬 Lecteur Direct MP4 (100% Sans Pub)</option>
-          <option value="piped_coffee">☕ Piped Coffee (Sans Pub - Serveur UE)</option>
-          <option value="piped_ducks">🦆 Piped Ducks (Sans Pub - Miroir Rapide)</option>
-          <option value="invidious">🛡️ Invidious (Sans Pub)</option>
-          <option value="nocookie">🔒 YouTube NoCookie (Secours Taff / Restreint)</option>
-        </select>
+              <option value="nocookie" selected>🔒 YouTube NoCookie (Sécurisé & Anti-Pub Taff - Stable)</option>
+              <option value="direct">🎬 Lecteur Direct MP4 (HTML5 Plyr - Flux Proxifié)</option>
+              <option value="inv_choco">🛡️ Invidious Choco (Proxy Local)</option>
+              <option value="inv_nadeko">🛡️ Invidious Nadeko (Proxy Local)</option>
+              <option value="inv_nerdvpn">🛡️ Invidious NerdVPN (Proxy Local)</option>
+              <option value="piped_coffee">☕ Piped Coffee (Serveur UE - Sans Pub)</option>
+              <option value="piped_ducks">🦆 Piped Ducks (Miroir Rapide - Sans Pub)</option>
+              <option value="cf_piped">⚡ Piped Cloudflare (Sans Pub)</option>
+            </select>
       </div>
     </div>
   </header>
@@ -1277,12 +1280,14 @@
           <div class="player-engine-controls">
             <span>Moteur :</span>
             <select id="player-engine-select" onchange="switchEngine(this.value)">
-              <option value="cf_piped" selected>⚡ Piped Cloudflare (Sans Pub - Recommandé)</option>
-              <option value="direct">🎬 Lecteur Direct MP4 (100% Sans Pub)</option>
+              <option value="nocookie" selected>🔒 YouTube NoCookie (Sécurisé & Anti-Pub Taff - Stable)</option>
+              <option value="direct">🎬 Lecteur Direct MP4 (HTML5 Plyr - Flux Proxifié)</option>
+              <option value="inv_choco">🛡️ Invidious Choco (Proxy Local)</option>
+              <option value="inv_nadeko">🛡️ Invidious Nadeko (Proxy Local)</option>
+              <option value="inv_nerdvpn">🛡️ Invidious NerdVPN (Proxy Local)</option>
               <option value="piped_coffee">☕ Piped Coffee (Sans Pub)</option>
               <option value="piped_ducks">🦆 Piped Ducks (Sans Pub)</option>
-              <option value="invidious">🛡️ Invidious (Sans Pub)</option>
-              <option value="nocookie">🔒 YouTube NoCookie (Secours Taff)</option>
+              <option value="cf_piped">⚡ Piped Cloudflare (Sans Pub)</option>
             </select>
           </div>
         </div>
@@ -1376,7 +1381,7 @@
   <script>
     let currentVideoId = '';
     let currentVideoObj = null;
-    let currentEngine = 'cf_piped';
+    let currentEngine = 'nocookie';
     let currentView = { type: 'trending' };
     let hasNavigated = false;
     let currentVideoChannel = null;
@@ -1397,14 +1402,15 @@
     // Dynamic Instances & Network Diagnostics State
     let networkStatus = {}; // { engineId: 'online' | 'blocked' | 'testing' }
     let allEngines = [
-      { id: 'cf_piped', name: 'Piped Cloudflare', url: 'https://cf.piped.video', badge: 'Recommandé 0 Pub', type: 'piped' },
-      { id: 'nocookie', name: 'YouTube NoCookie', url: 'https://www.youtube-nocookie.com', badge: 'Anti-Pub Taff', type: 'nocookie' },
+      { id: 'nocookie', name: 'YouTube NoCookie', url: 'https://www.youtube-nocookie.com', badge: 'Anti-Pub Taff (Stable)', type: 'nocookie' },
       { id: 'direct', name: 'Direct MP4', badge: 'HTML5 Plyr', type: 'direct' },
-      { id: 'piped_coffee', name: 'Piped Coffee', url: 'https://piped.private.coffee', badge: 'Serveur UE', type: 'piped' },
-      { id: 'piped_ducks', name: 'Piped Ducks', url: 'https://piped.ducks.party', badge: 'Rapide', type: 'piped' },
-      { id: 'piped_mha', name: 'Piped MHA', url: 'https://piped.mha.fi', badge: 'Miroir FI', type: 'piped' },
-      { id: 'inv_choco', name: 'Invidious Choco', url: 'https://yt.chocolatemoo53.com', badge: 'US', type: 'invidious' },
-      { id: 'inv_protokolla', name: 'Invidious Protokolla', url: 'https://invidious.protokolla.fi', badge: 'Stable', type: 'invidious' }
+      { id: 'inv_choco', name: 'Invidious Choco', url: 'https://yt.chocolatemoo53.com', badge: 'Proxy Local', type: 'invidious' },
+      { id: 'inv_nadeko', name: 'Invidious Nadeko', url: 'https://inv.nadeko.net', badge: 'Proxy Local', type: 'invidious' },
+      { id: 'inv_nerdvpn', name: 'Invidious NerdVPN', url: 'https://invidious.nerdvpn.de', badge: 'Proxy Local', type: 'invidious' },
+      { id: 'piped_coffee', name: 'Piped Coffee', url: 'https://piped.private.coffee', badge: 'Serveur UE (200)', type: 'piped' },
+      { id: 'piped_ducks', name: 'Piped Ducks', url: 'https://piped.ducks.party', badge: 'Rapide (200)', type: 'piped' },
+      { id: 'piped_mha', name: 'Piped MHA', url: 'https://piped.mha.fi', badge: 'Miroir FI (200)', type: 'piped' },
+      { id: 'cf_piped', name: 'Piped Cloudflare', url: 'https://cf.piped.video', badge: 'Cloudflare CDN', type: 'piped' }
     ];
 
     let activeStreamApis = [
@@ -1420,17 +1426,15 @@
     ];
 
     const ENGINES = {
-      cf_piped: id => `https://cf.piped.video/embed/${id}?autoplay=1`,
       nocookie: id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&start=1&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1`,
       direct: id => null,
+      inv_choco: id => `https://yt.chocolatemoo53.com/embed/${id}?autoplay=1&local=true`,
+      inv_nadeko: id => `https://inv.nadeko.net/embed/${id}?autoplay=1&local=true`,
+      inv_nerdvpn: id => `https://invidious.nerdvpn.de/embed/${id}?autoplay=1&local=true`,
       piped_coffee: id => `https://piped.private.coffee/embed/${id}?autoplay=1`,
       piped_ducks: id => `https://piped.ducks.party/embed/${id}?autoplay=1`,
       piped_mha: id => `https://piped.mha.fi/embed/${id}?autoplay=1`,
-      piped_segfault: id => `https://piped.projectsegfau.lt/embed/${id}?autoplay=1`,
-      inv_choco: id => `https://yt.chocolatemoo53.com/embed/${id}?autoplay=1`,
-      inv_protokolla: id => `https://invidious.protokolla.fi/embed/${id}?autoplay=1`,
-      inv_tiekoetter: id => `https://invidious.tiekoetter.com/embed/${id}?autoplay=1`,
-      inv_yewtu: id => `https://yewtu.be/embed/${id}?autoplay=1`
+      cf_piped: id => `https://cf.piped.video/embed/${id}?autoplay=1`
     };
 
     const CATEGORY_MAP = {
@@ -1785,6 +1789,25 @@
     }
 
     // Direct MP4 / HLS Player avec timeout strict de 2000ms et bascule automatique
+    function toProxiedUrl(rawUrl, instanceUrl) {
+      if (!rawUrl) return null;
+      try {
+        const u = new URL(rawUrl);
+        if (u.hostname.includes('googlevideo.com')) {
+          const inst = new URL(instanceUrl);
+          u.protocol = inst.protocol;
+          u.host = inst.host;
+        }
+        if (!u.searchParams.has('local')) {
+          u.searchParams.set('local', 'true');
+        }
+        return u.toString();
+      } catch (e) {
+        if (rawUrl.includes('?')) return `${rawUrl}&local=true`;
+        return rawUrl;
+      }
+    }
+
     async function playDirectStream(videoId) {
       hideAllPlayerContainers();
       const directCont = document.getElementById('direct-player-container');
@@ -1799,12 +1822,14 @@
       const videoEl = document.getElementById('plyr-video');
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500); // Timeout 3500ms
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondes en parallèle
 
       const streamEndpoints = [
-        { name: 'Invidious Choco API', url: `https://yt.chocolatemoo53.com/api/v1/videos/${videoId}`, type: 'invidious' },
-        { name: 'Piped Ducks API', url: `https://pipedapi.ducks.party/streams/${videoId}`, type: 'piped' },
-        { name: 'Piped Coffee API', url: `https://api.piped.private.coffee/streams/${videoId}`, type: 'piped' }
+        { name: 'Invidious Choco', url: `https://yt.chocolatemoo53.com/api/v1/videos/${videoId}`, type: 'invidious', base: 'https://yt.chocolatemoo53.com' },
+        { name: 'Invidious Nadeko', url: `https://inv.nadeko.net/api/v1/videos/${videoId}`, type: 'invidious', base: 'https://inv.nadeko.net' },
+        { name: 'Invidious NerdVPN', url: `https://invidious.nerdvpn.de/api/v1/videos/${videoId}`, type: 'invidious', base: 'https://invidious.nerdvpn.de' },
+        { name: 'Piped Ducks', url: `https://pipedapi.ducks.party/streams/${videoId}`, type: 'piped', base: 'https://pipedapi.ducks.party' },
+        { name: 'Piped Coffee', url: `https://api.piped.private.coffee/streams/${videoId}`, type: 'piped', base: 'https://api.piped.private.coffee' }
       ];
 
       const streamPromises = streamEndpoints.map(api => {
@@ -1820,10 +1845,10 @@
             if (api.type === 'invidious') {
               if (data.formatStreams && data.formatStreams.length > 0) {
                 const sorted = [...data.formatStreams].sort((a, b) => (parseInt(b.resolution) || 0) - (parseInt(a.resolution) || 0));
-                mp4 = sorted[0].url;
+                mp4 = toProxiedUrl(sorted[0].url, api.base);
               } else if (data.adaptiveFormats && data.adaptiveFormats.length > 0) {
                 const mp4Adaptive = data.adaptiveFormats.find(f => f.type && f.type.startsWith('video/mp4') && f.url);
-                if (mp4Adaptive) mp4 = mp4Adaptive.url;
+                if (mp4Adaptive) mp4 = toProxiedUrl(mp4Adaptive.url, api.base);
               }
             } else {
               // Piped
@@ -1860,24 +1885,37 @@
       if (loading) loading.style.display = 'none';
 
       if (streamResult && (streamResult.mp4 || streamResult.hls)) {
+        let playStarted = false;
         if (streamResult.hls && window.Hls && Hls.isSupported()) {
-          if (hlsInstance) hlsInstance.destroy();
-          hlsInstance = new Hls();
-          hlsInstance.loadSource(streamResult.hls);
-          hlsInstance.attachMedia(videoEl);
-          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-            videoEl.play().catch(e => console.log("Autoplay:", e));
-          });
-        } else if (streamResult.mp4) {
+          try {
+            if (hlsInstance) hlsInstance.destroy();
+            hlsInstance = new Hls();
+            hlsInstance.loadSource(streamResult.hls);
+            hlsInstance.attachMedia(videoEl);
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+              videoEl.play().catch(e => console.log("Autoplay:", e));
+            });
+            playStarted = true;
+          } catch (e) {
+            console.warn("Erreur HLS:", e);
+          }
+        }
+        
+        if (!playStarted && streamResult.mp4) {
           videoEl.src = streamResult.mp4;
           videoEl.load();
           videoEl.play().catch(e => console.log("Autoplay:", e));
+          playStarted = true;
         }
-        showToast(`🎬 Flux Direct HTML5 actif (${streamResult.apiName})`);
-      } else {
-        showToast("⚡ Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub");
-        switchEngine('nocookie');
+
+        if (playStarted) {
+          showToast(`🎬 Flux Direct HTML5 actif (${streamResult.apiName})`);
+          return;
+        }
       }
+
+      showToast("⚡ Flux direct indisponible : bascule automatique sur NoCookie Anti-Pub");
+      switchEngine('nocookie');
     }
 
     // Official YouTube IFrame API Handler with Ad Watchdog & Auto-Reload
@@ -1977,22 +2015,31 @@
     function skipNoCookieAdByTimestamp() {
       if (isAdReloading) return;
       isAdReloading = true;
-      const resumeAt = Math.max(1, lastKnownTime || 1);
-      showToast(`⚡ Saut de pub : rechargement à ${formatTime(resumeAt)}...`);
+
+      let resumeAt = Math.max(1, lastKnownTime || 1);
+      try {
+        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+          const t = ytPlayer.getCurrentTime();
+          if (t && t > 0) resumeAt = Math.floor(t);
+        }
+      } catch (e) {}
+
+      const nextStart = resumeAt + 1;
+      showToast(`⚡ Saut de pub : rechargement à ${formatTime(nextStart)}...`);
 
       try {
         if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
           ytPlayer.loadVideoById({
             videoId: currentVideoId,
-            startSeconds: resumeAt + 1
+            startSeconds: nextStart
           });
-          setTimeout(() => { isAdReloading = false; }, 2000);
+          setTimeout(() => { isAdReloading = false; }, 1500);
           return;
         }
       } catch (e) {}
 
-      loadYouTubeIframePlayer(currentVideoId, resumeAt + 1);
-      setTimeout(() => { isAdReloading = false; }, 2000);
+      loadYouTubeIframePlayer(currentVideoId, nextStart);
+      setTimeout(() => { isAdReloading = false; }, 1500);
     }
 
     function quickSeekNoCookie(seconds) {
@@ -2072,6 +2119,11 @@
       currentEngine = engine;
       renderEnginePills();
 
+      const selectGlobal = document.getElementById('global-engine');
+      if (selectGlobal) selectGlobal.value = engine;
+      const selectPlayer = document.getElementById('player-engine-select');
+      if (selectPlayer) selectPlayer.value = engine;
+
       const adTools = document.getElementById('nocookie-ad-tools');
       const workTip = document.getElementById('nocookie-work-tip');
 
@@ -2086,7 +2138,7 @@
         hideAllPlayerContainers();
         const frame = document.getElementById('video-frame');
         frame.style.display = 'block';
-        frame.src = ENGINES[engine] ? ENGINES[engine](videoId) : `https://cf.piped.video/embed/${videoId}?autoplay=1`;
+        frame.src = ENGINES[engine] ? ENGINES[engine](videoId) : `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&start=1&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1`;
       }
     }
 
