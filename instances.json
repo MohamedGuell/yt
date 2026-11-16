@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "updated_at": "2026-11-16T02:00:00Z",
+  "piped_frontends": [
+    { "id": "cf_piped", "name": "Piped Cloudflare", "url": "https://cf.piped.video", "type": "piped", "badge": "Cloudflare CDN" },
+    { "id": "piped_coffee", "name": "Piped Coffee", "url": "https://piped.private.coffee", "type": "piped", "badge": "Serveur UE" },
+    { "id": "piped_ducks", "name": "Piped Ducks", "url": "https://piped.ducks.party", "type": "piped", "badge": "Rapide" },
+    { "id": "piped_mha", "name": "Piped MHA", "url": "https://piped.mha.fi", "type": "piped", "badge": "Miroir FI" },
+    { "id": "piped_segfault", "name": "Piped Segfault", "url": "https://piped.projectsegfau.lt", "type": "piped", "badge": "Miroir DE" }
+  ],
+  "invidious_frontends": [
+    { "id": "inv_protokolla", "name": "Invidious Protokolla", "url": "https://invidious.protokolla.fi", "type": "invidious", "badge": "Stable" },
+    { "id": "inv_choco", "name": "Invidious Choco", "url": "https://yt.chocolatemoo53.com", "type": "invidious", "badge": "US" },
+    { "id": "inv_tiekoetter", "name": "Invidious Tiekoetter", "url": "https://invidious.tiekoetter.com", "type": "invidious", "badge": "DE" },
+    { "id": "inv_yewtu", "name": "Invidious Yewtu", "url": "https://yewtu.be", "type": "invidious", "badge": "Historique" }
+  ],
+  "stream_apis": [
+    { "name": "Piped Coffee API", "url": "https://api.piped.private.coffee", "type": "piped" },
+    { "name": "Piped Ducks API", "url": "https://pipedapi.ducks.party", "type": "piped" },
+    { "name": "Invidious Choco API", "url": "https://yt.chocolatemoo53.com", "type": "invidious" }
+  ],
+  "cors_proxies": [
+    "https://api.allorigins.win/raw?url=",
+    "https://corsproxy.io/?"
+  ]
+}
