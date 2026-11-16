@@ -245,13 +245,151 @@
       background: #000;
     }
 
-    .video-viewport iframe {
+    .video-viewport iframe,
+    .video-viewport video {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       border: none;
+      background: #000;
+    }
+
+    .direct-loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 10;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .player-engine-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .engine-bar-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    .engine-pill-btn {
+      background: var(--surface-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 13px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .engine-pill-btn:hover {
+      background: var(--surface-active);
+      border-color: #555;
+    }
+
+    .engine-pill-btn.active {
+      background: var(--yt-red);
+      color: #fff;
+      border-color: var(--yt-red);
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(255, 0, 0, 0.35);
+    }
+
+    .nocookie-ad-tools {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255, 170, 0, 0.08);
+      border: 1px solid rgba(255, 170, 0, 0.25);
+      border-radius: 8px;
+    }
+
+    .ad-tools-tag {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #ffb74d;
+      margin-right: 4px;
+    }
+
+    .ad-tool-btn {
+      background: var(--surface-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .ad-tool-btn:hover {
+      background: var(--surface-active);
+      border-color: #ffb74d;
+    }
+
+    .nocookie-work-tip {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(62, 166, 255, 0.08);
+      border-left: 3px solid #3ea6ff;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      color: #ccc;
+      line-height: 1.4;
+    }
+
+    .nocookie-work-tip strong {
+      color: #fff;
+    }
+
+    .toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e1e1e;
+      color: #fff;
+      border: 1px solid #333;
+      border-left: 4px solid var(--yt-red);
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+      font-size: 0.88rem;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+
+    .toast-notification.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .player-details {
@@ -998,10 +1136,12 @@
       <div class="engine-badge">
         <span>Lecteur :</span>
         <select id="global-engine" onchange="onGlobalEngineChange(this.value)">
-          <option value="nocookie" selected>YouTube NoCookie (Recommandé - Sans blocage)</option>
-          <option value="piped">Piped (Miroir)</option>
-          <option value="pipedCoffee">Piped Coffee</option>
-          <option value="yewtu">Invidious</option>
+          <option value="cf_piped" selected>⚡ Piped Cloudflare (Sans Pub & Anti-Blocage Taff - Recommandé)</option>
+          <option value="direct">🎬 Lecteur Direct MP4 (100% Sans Pub)</option>
+          <option value="piped_coffee">☕ Piped Coffee (Sans Pub - Serveur UE)</option>
+          <option value="piped_ducks">🦆 Piped Ducks (Sans Pub - Miroir Rapide)</option>
+          <option value="invidious">🛡️ Invidious (Sans Pub)</option>
+          <option value="nocookie">🔒 YouTube NoCookie (Secours Taff / Restreint)</option>
         </select>
       </div>
     </div>
@@ -1029,6 +1169,15 @@
           sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" 
           referrerpolicy="origin">
         </iframe>
+
+        <!-- Lecteur Direct HTML5 MP4 (100% sans pub) -->
+        <video id="direct-video" controls playsinline style="display: none;"></video>
+
+        <!-- Indicateur de chargement flux direct -->
+        <div id="direct-loading-overlay" class="direct-loading-overlay" style="display: none;">
+          <div class="spinner"></div>
+          <p id="direct-loading-text">Extraction du flux vidéo direct sans pub...</p>
+        </div>
 
         <!-- Overlay Fin de Vidéo : empêche toute redirection vers youtube.com et permet de continuer en direct -->
         <div id="player-endscreen-overlay" class="player-endscreen-overlay" style="display: none;">
@@ -1066,12 +1215,41 @@
           <div class="player-engine-controls">
             <span>Moteur :</span>
             <select id="player-engine-select" onchange="switchEngine(this.value)">
-              <option value="nocookie" selected>YouTube NoCookie (Recommandé)</option>
-              <option value="piped">Piped (Miroir)</option>
-              <option value="pipedCoffee">Piped Coffee</option>
-              <option value="yewtu">Invidious</option>
+              <option value="cf_piped" selected>⚡ Piped Cloudflare (Sans Pub - Recommandé)</option>
+              <option value="direct">🎬 Lecteur Direct MP4 (100% Sans Pub)</option>
+              <option value="piped_coffee">☕ Piped Coffee (Sans Pub)</option>
+              <option value="piped_ducks">🦆 Piped Ducks (Sans Pub)</option>
+              <option value="invidious">🛡️ Invidious (Sans Pub)</option>
+              <option value="nocookie">🔒 YouTube NoCookie (Secours Taff)</option>
             </select>
           </div>
+        </div>
+
+        <!-- Boutons de bascule rapide de moteur -->
+        <div class="player-engine-bar">
+          <span class="engine-bar-label">Lecteur rapide :</span>
+          <button class="engine-pill-btn active" data-engine="cf_piped" onclick="switchEngine('cf_piped')" title="Hébergé sur Cloudflare - Sans pub et passe les pares-feux d'entreprise">⚡ Cloudflare</button>
+          <button class="engine-pill-btn" data-engine="direct" onclick="switchEngine('direct')" title="Lecteur natif HTML5 avec flux brut MP4 - 0 pub garanti">🎬 Direct MP4</button>
+          <button class="engine-pill-btn" data-engine="piped_coffee" onclick="switchEngine('piped_coffee')" title="Instance européenne stable">☕ Coffee</button>
+          <button class="engine-pill-btn" data-engine="piped_ducks" onclick="switchEngine('piped_ducks')" title="Miroir rapide">🦆 Ducks</button>
+          <button class="engine-pill-btn" data-engine="invidious" onclick="switchEngine('invidious')" title="Alternative Invidious sans pub">🛡️ Invidious</button>
+          <button class="engine-pill-btn" data-engine="nocookie" onclick="switchEngine('nocookie')" title="Secours en entreprise si tous les autres domaines sont bloqués">🔒 NoCookie (Taff)</button>
+        </div>
+
+        <!-- Outils Anti-Pub spécifiques au mode NoCookie -->
+        <div id="nocookie-ad-tools" class="nocookie-ad-tools" style="display: none;">
+          <span class="ad-tools-tag">⚡ Outils Pub NoCookie :</span>
+          <button class="ad-tool-btn" onclick="skipNoCookieAd(15)" title="Avancer de 15s">+15s ⏩</button>
+          <button class="ad-tool-btn" onclick="skipNoCookieAd(30)" title="Avancer de 30s">+30s ⏩</button>
+          <button class="ad-tool-btn" onclick="skipNoCookieAd(60)" title="Avancer de 60s">+60s ⏩</button>
+          <button class="ad-tool-btn" onclick="setSpeedNoCookie(2)" title="Accélérer la pub à 2x">Vitesse 2x ⚡</button>
+          <button class="ad-tool-btn" onclick="setSpeedNoCookie(1)" title="Vitesse normale 1x">1x</button>
+          <button class="ad-tool-btn" id="mute-tool-btn" onclick="toggleMuteNoCookie()" title="Couper le son pendant la pub">🔇 Muet</button>
+        </div>
+
+        <!-- Conseil réseau entreprise (Taff) -->
+        <div id="nocookie-work-tip" class="nocookie-work-tip" style="display: none;">
+          <span>🏢 <strong>Mode Secours Taff :</strong> YouTube impose des pubs dans son lecteur NoCookie si aucun bloqueur n'est actif. Pour 0 pub au travail, privilégiez <strong>⚡ Piped Cloudflare</strong> ou installez l'extension <strong>uBlock Origin</strong> dans votre navigateur.</span>
         </div>
       </div>
 
@@ -1141,20 +1319,116 @@
 
     let currentVideoId = '';
     let currentVideoObj = null;
-    let currentEngine = 'nocookie';
+    let currentEngine = 'cf_piped';
     let currentView = { type: 'trending' };
     let hasNavigated = false;
     let currentVideoChannel = null;
     let currentRelatedVideos = [];
     let endScreenTimerInterval = null;
     let endScreenCountdown = 5;
+    let isNoCookieMuted = false;
 
     const ENGINES = {
-      nocookie: id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&enablejsapi=1`,
-      piped: id => `https://piped.video/embed/${id}?autoplay=1`,
-      pipedCoffee: id => `https://piped.private.coffee/embed/${id}?autoplay=1`,
-      yewtu: id => `https://yewtu.be/embed/${id}?autoplay=1`
+      cf_piped: id => `https://cf.piped.video/embed/${id}?autoplay=1`,
+      direct: id => null,
+      piped_coffee: id => `https://piped.private.coffee/embed/${id}?autoplay=1`,
+      piped_ducks: id => `https://piped.ducks.party/embed/${id}?autoplay=1`,
+      invidious: id => `https://invidious.protokolla.fi/embed/${id}?autoplay=1`,
+      nocookie: id => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1`
     };
+
+    function showToast(message) {
+      let toast = document.getElementById('toast-notification');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-notification';
+        toast.className = 'toast-notification';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    async function playDirectStream(videoId) {
+      const frame = document.getElementById('video-frame');
+      const directVideo = document.getElementById('direct-video');
+      const loadingOverlay = document.getElementById('direct-loading-overlay');
+      const loadingText = document.getElementById('direct-loading-text');
+
+      frame.style.display = 'none';
+      frame.src = '';
+      directVideo.style.display = 'block';
+      if (loadingOverlay) loadingOverlay.style.display = 'flex';
+      if (loadingText) loadingText.textContent = "Extraction du flux vidéo direct sans pub...";
+
+      let streamUrl = null;
+      for (const base of PIPED_APIS) {
+        try {
+          if (loadingText) loadingText.textContent = "Recherche flux vidéo direct HD...";
+          const res = await fetch(`${base}/streams/${videoId}`, { signal: AbortSignal.timeout(5500) });
+          if (res.ok) {
+            const data = await res.json();
+            const muxed = (data.videoStreams || []).filter(s => !s.videoOnly && s.url);
+            if (muxed.length > 0) {
+              muxed.sort((a, b) => (parseInt(b.quality) || 0) - (parseInt(a.quality) || 0));
+              streamUrl = muxed[0].url;
+              break;
+            } else if (data.videoStreams && data.videoStreams.length > 0) {
+              const valid = data.videoStreams.filter(s => s.url);
+              if (valid.length > 0) {
+                streamUrl = valid[0].url;
+                break;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Échec stream sur", base, e);
+        }
+      }
+
+      if (loadingOverlay) loadingOverlay.style.display = 'none';
+
+      if (streamUrl) {
+        directVideo.src = streamUrl;
+        directVideo.load();
+        directVideo.play().catch(e => console.log("Autoplay bloqué par le navigateur:", e));
+        showToast("🎬 Lecture directe MP4 active (100% Sans Pub)");
+      } else {
+        showToast("Flux direct indisponible sur ce réseau, bascule vers Piped Cloudflare...");
+        switchEngine('cf_piped');
+      }
+    }
+
+    function sendYTCommand(func, args = []) {
+      const frame = document.getElementById('video-frame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage(JSON.stringify({
+          event: 'command',
+          func: func,
+          args: args
+        }), '*');
+      }
+    }
+
+    function skipNoCookieAd(seconds) {
+      sendYTCommand('seekTo', [seconds, true]);
+      showToast(`⏩ Avance rapide de +${seconds}s`);
+    }
+
+    function toggleMuteNoCookie() {
+      isNoCookieMuted = !isNoCookieMuted;
+      sendYTCommand(isNoCookieMuted ? 'mute' : 'unMute');
+      const btn = document.getElementById('mute-tool-btn');
+      if (btn) btn.textContent = isNoCookieMuted ? '🔊 Rétablir son' : '🔇 Muet';
+    }
+
+    function setSpeedNoCookie(rate) {
+      sendYTCommand('setPlaybackRate', [rate]);
+      showToast(`⚡ Vitesse définie à ${rate}x`);
+    }
 
     // Helper: Query Piped API with automatic failover
     async function apiRequest(endpoint) {
@@ -1277,10 +1551,36 @@
 
       const engine = document.getElementById('global-engine').value;
       currentEngine = engine;
-      document.getElementById('player-engine-select').value = engine;
+      const playerSel = document.getElementById('player-engine-select');
+      if (playerSel) playerSel.value = engine;
+
+      // Update pills
+      document.querySelectorAll('.engine-pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-engine') === engine);
+      });
 
       const frame = document.getElementById('video-frame');
-      frame.src = ENGINES[engine](video.id);
+      const directVideo = document.getElementById('direct-video');
+      const adTools = document.getElementById('nocookie-ad-tools');
+      const workTip = document.getElementById('nocookie-work-tip');
+
+      if (adTools) adTools.style.display = (engine === 'nocookie') ? 'flex' : 'none';
+      if (workTip) workTip.style.display = (engine === 'nocookie') ? 'flex' : 'none';
+
+      if (engine === 'direct') {
+        frame.style.display = 'none';
+        frame.src = '';
+        directVideo.style.display = 'block';
+        playDirectStream(video.id);
+      } else {
+        if (directVideo) {
+          directVideo.pause();
+          directVideo.src = '';
+          directVideo.style.display = 'none';
+        }
+        frame.style.display = 'block';
+        frame.src = ENGINES[engine](video.id);
+      }
 
       document.getElementById('player-title').textContent = video.title || 'Vidéo';
       document.getElementById('player-channel').textContent = video.uploader || 'Chaîne YouTube';
@@ -1496,8 +1796,18 @@
     function replayCurrentVideo() {
       hideEndScreenOverlay();
       if (currentVideoId) {
-        const frame = document.getElementById('video-frame');
-        frame.src = ENGINES[currentEngine](currentVideoId);
+        if (currentEngine === 'direct') {
+          const directVideo = document.getElementById('direct-video');
+          if (directVideo && directVideo.src) {
+            directVideo.currentTime = 0;
+            directVideo.play();
+          } else {
+            playDirectStream(currentVideoId);
+          }
+        } else {
+          const frame = document.getElementById('video-frame');
+          frame.src = ENGINES[currentEngine](currentVideoId);
+        }
       }
     }
 
@@ -1535,10 +1845,38 @@
 
     function switchEngine(engine) {
       currentEngine = engine;
-      document.getElementById('global-engine').value = engine;
-      document.getElementById('player-engine-select').value = engine;
-      if (currentVideoId) {
-        document.getElementById('video-frame').src = ENGINES[engine](currentVideoId);
+      const globalSel = document.getElementById('global-engine');
+      const playerSel = document.getElementById('player-engine-select');
+      if (globalSel) globalSel.value = engine;
+      if (playerSel) playerSel.value = engine;
+
+      document.querySelectorAll('.engine-pill-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-engine') === engine);
+      });
+
+      const frame = document.getElementById('video-frame');
+      const directVideo = document.getElementById('direct-video');
+      const adTools = document.getElementById('nocookie-ad-tools');
+      const workTip = document.getElementById('nocookie-work-tip');
+
+      if (adTools) adTools.style.display = (engine === 'nocookie') ? 'flex' : 'none';
+      if (workTip) workTip.style.display = (engine === 'nocookie') ? 'flex' : 'none';
+
+      if (!currentVideoId) return;
+
+      if (engine === 'direct') {
+        frame.style.display = 'none';
+        frame.src = '';
+        directVideo.style.display = 'block';
+        playDirectStream(currentVideoId);
+      } else {
+        if (directVideo) {
+          directVideo.pause();
+          directVideo.src = '';
+          directVideo.style.display = 'none';
+        }
+        frame.style.display = 'block';
+        frame.src = ENGINES[engine](currentVideoId);
       }
     }
 
@@ -1550,7 +1888,16 @@
       hideEndScreenOverlay();
       const playerSec = document.getElementById('player-section');
       playerSec.style.display = 'none';
-      document.getElementById('video-frame').src = '';
+      const frame = document.getElementById('video-frame');
+      if (frame) frame.src = '';
+      const directVideo = document.getElementById('direct-video');
+      if (directVideo) {
+        directVideo.pause();
+        directVideo.src = '';
+        directVideo.style.display = 'none';
+      }
+      const loadingOverlay = document.getElementById('direct-loading-overlay');
+      if (loadingOverlay) loadingOverlay.style.display = 'none';
       currentVideoId = '';
       currentVideoObj = null;
       const relGrid = document.getElementById('related-videos-grid');
@@ -2007,6 +2354,17 @@
         searchVideos(q, false);
       } else {
         loadTrending(false);
+      }
+    });
+  </script>
+  <div id="toast-notification" class="toast-notification">Notification</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const dv = document.getElementById('direct-video');
+      if (dv) {
+        dv.addEventListener('ended', () => {
+          triggerVideoEnded();
+        });
       }
     });
   </script>
